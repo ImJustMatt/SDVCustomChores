@@ -6,5 +6,5 @@
    "UniqueID": "furyx639.CustomChores",
    "EntryDll": "CustomChores.dll",
    "MinimumApiVersion": "2.0",
-   "UpdateKeys": []
+   "UpdateKeys": ["Nexus:5175"]
 }
