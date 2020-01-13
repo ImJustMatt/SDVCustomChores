@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Harmony;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -16,8 +17,6 @@ namespace LeFauxMatt.CustomChores
         /*********
         ** Fields
         *********/
-        public static IModHelper _helper;
-
         /// <summary>Custom Chores API.</summary>
         private CustomChoresAPI API;
 
@@ -27,6 +26,9 @@ namespace LeFauxMatt.CustomChores
         /// <summary>The custom chores.</summary>
         private readonly IDictionary<string, ICustomChore> Chores = new Dictionary<string, ICustomChore>();
 
+        /// <summary>The custom chores.</summary>
+        private IEnumerable<Translation> Dialogues;
+
         /*********
         ** Public methods
         *********/
@@ -34,8 +36,6 @@ namespace LeFauxMatt.CustomChores
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            _helper = helper;
-
             this.Config = Helper.ReadConfig<ModConfig>();
             this.API = new CustomChoresAPI(this.Monitor, this.Chores);
 
@@ -45,11 +45,36 @@ namespace LeFauxMatt.CustomChores
             helper.ConsoleCommands.Add("chore_listall", "List all available chores by name.", this.ListChores);
             helper.ConsoleCommands.Add("chore_doit", "Performs the custom chore on demand.\n\nUsage: chore_doit <value>\n- value: the chore name.", this.DoChore);
             helper.ConsoleCommands.Add("chore_candoit", "Checks if the current conditions allows a custom chore to be done.\n\nUsage: chore_candoit <value>\n- value: the chore name.", this.CanDoChore);
+
+            Dialogues = helper.Translation.GetTranslations();
+
+            if (!helper.Translation.GetTranslations().Any())
+                this.Config.EnableDialogue = false;
         }
 
         public override object GetApi()
         {
             return new CustomChoresAPI(this.Monitor, this.Chores);
+        }
+
+        internal string GetDialogue(string spouseName, string choreName)
+        {
+            IList<Translation> dialogues = Dialogues.Where(dialogue => dialogue.Key.Contains($"{spouseName}.{choreName}")).ToList();
+
+            if (dialogues.Count == 0)
+                return (string) null;
+            
+            Random rnd = new Random();
+            int index = rnd.Next(dialogues.Count);
+            
+            object tokens = new
+            {
+                playerName = Game1.player.Name,
+                nickName = Game1.player.getSpouse().getTermOfSpousalEndearment(),
+                petName = Game1.player.getPetName()
+            };
+
+            return dialogues[index].Tokens(tokens);
         }
 
         /*********
@@ -69,12 +94,12 @@ namespace LeFauxMatt.CustomChores
             );
 
             // Load default chores
-            this.API.AddCustomChore(new FeedTheAnimals());
-            this.API.AddCustomChore(new FeedThePet());
-            this.API.AddCustomChore(new PetTheAnimals());
-            this.API.AddCustomChore(new RepairTheFences());
-            this.API.AddCustomChore(new WaterTheCrops());
-            this.API.AddCustomChore(new WaterTheSlimes());
+            this.API.AddCustomChore(new FeedTheAnimals(this));
+            this.API.AddCustomChore(new FeedThePet(this));
+            this.API.AddCustomChore(new PetTheAnimals(this));
+            this.API.AddCustomChore(new RepairTheFences(this));
+            this.API.AddCustomChore(new WaterTheCrops(this));
+            this.API.AddCustomChore(new WaterTheSlimes(this));
         }
 
         /// <summary>

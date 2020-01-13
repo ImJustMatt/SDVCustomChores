@@ -7,6 +7,13 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
     {
         public string ChoreName { get; } = "FeedThePet";
 
+        private readonly CustomChores ModInstance;
+
+        public FeedThePet(CustomChores instance)
+        {
+            this.ModInstance = instance;
+        }
+
         public bool CanDoIt()
         {
             return !Game1.isRaining && !Game1.getFarm().petBowlWatered.Value;
@@ -20,9 +27,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public string GetDialogue(string spouseName)
         {
-            string petName = Game1.player.getPetName();
-            Translation translation = CustomChores._helper.Translation.Get($"{spouseName}.{ChoreName}", new { petName = petName });
-            return translation.ToString();
+            return ModInstance.GetDialogue(spouseName, ChoreName);
         }
     }
 }

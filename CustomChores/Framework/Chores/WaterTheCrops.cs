@@ -8,6 +8,13 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
     {
         public string ChoreName { get; } = "WaterTheCrops";
 
+        private readonly CustomChores ModInstance;
+
+        public WaterTheCrops(CustomChores instance)
+        {
+            this.ModInstance = instance;
+        }
+
         public bool CanDoIt()
         {
             return !Game1.isRaining && !Game1.currentSeason.Equals("winter");
@@ -37,8 +44,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public string GetDialogue(string spouseName)
         {
-            Translation translation = CustomChores._helper.Translation.Get($"{spouseName}.{ChoreName}");
-            return translation.ToString();
+            return ModInstance.GetDialogue(spouseName, ChoreName);
         }
     }
 }

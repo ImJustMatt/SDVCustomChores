@@ -1,4 +1,6 @@
-﻿using StardewModdingAPI;
+﻿using System;
+using System.Collections.Generic;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 
@@ -7,6 +9,13 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
     class FeedTheAnimals: ICustomChore
     {
         public string ChoreName { get; } = "FeedTheAnimals";
+
+        private readonly CustomChores ModInstance;
+
+        public FeedTheAnimals(CustomChores instance)
+        {
+            this.ModInstance = instance;
+        }
 
         public bool CanDoIt()
         {
@@ -34,8 +43,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public string GetDialogue(string spouseName)
         {
-            Translation translation = CustomChores._helper.Translation.Get($"{spouseName}.{ChoreName}");
-            return translation.ToString();
+            return ModInstance.GetDialogue(spouseName, ChoreName);
         }
     }
 }
