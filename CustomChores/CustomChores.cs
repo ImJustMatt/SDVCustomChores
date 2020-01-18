@@ -67,14 +67,12 @@ namespace LeFauxMatt.CustomChores
             Random rnd = new Random();
             int index = rnd.Next(dialogues.Count);
             
-            object tokens = new
+            return dialogues[index].Tokens(new
             {
                 playerName = Game1.player.Name,
                 nickName = Game1.player.getSpouse().getTermOfSpousalEndearment(),
                 petName = Game1.player.getPetName()
-            };
-
-            return dialogues[index].Tokens(tokens);
+            });
         }
 
         /*********
