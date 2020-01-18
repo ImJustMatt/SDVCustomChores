@@ -1,49 +1,37 @@
-﻿using StardewModdingAPI;
+﻿using System.Linq;
 using StardewValley;
-using StardewValley.Buildings;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
 {
-    class WaterTheSlimes : ICustomChore
+    internal class WaterTheSlimes : ICustomChore
     {
         public string ChoreName { get; } = "WaterTheSlimes";
 
-        private readonly CustomChores ModInstance;
+        private readonly CustomChores _modInstance;
 
         public WaterTheSlimes(CustomChores instance)
         {
-            this.ModInstance = instance;
+            this._modInstance = instance;
         }
 
         public bool CanDoIt()
         {
-            foreach (Building building in Game1.getFarm().buildings)
-            {
-                if (building.daysOfConstructionLeft.Value > 0)
-                    continue;
-
-                if (building.indoors.Value is SlimeHutch)
-                    return true;
-            }
-            return false;
+            return Game1.getFarm().buildings
+                .Where(building => building.daysOfConstructionLeft.Value <= 0)
+                .Any(building => building.indoors.Value is SlimeHutch);
         }
 
         public bool DoIt()
         {
-            bool success = false;
+            var success = false;
 
-            foreach (Building building in Game1.getFarm().buildings)
+            foreach (var building in Game1.getFarm().buildings.Where(building => building.daysOfConstructionLeft.Value <= 0))
             {
-                if (building.daysOfConstructionLeft.Value > 0)
+                if (!(building.indoors.Value is SlimeHutch slimeHutch))
                     continue;
-
-                if (building.indoors.Value is SlimeHutch slimeHutch)
-                {
-                    for (int index = 0; index < slimeHutch.waterSpots.Count; ++index)
-                        slimeHutch.waterSpots[index] = true;
-
-                    success = true;
-                }
+                for (var index = 0; index < slimeHutch.waterSpots.Count; ++index)
+                    slimeHutch.waterSpots[index] = true;
+                success = true;
             }
 
             return success;
@@ -51,7 +39,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public string GetDialogue(string spouseName)
         {
-            return ModInstance.GetDialogue(spouseName, ChoreName);
+            return _modInstance.GetDialogue(spouseName, ChoreName);
         }
     }
 }

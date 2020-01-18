@@ -1,30 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using StardewModdingAPI;
-using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework
 {
-    public class CustomChoresAPI: ICustomChoresAPI
+    public class CustomChoresApi: ICustomChoresApi
     {
-        private readonly IMonitor Monitor;
-        private readonly IDictionary<string, ICustomChore> Chores;
+        private readonly IMonitor _monitor;
+        private readonly IDictionary<string, ICustomChore> _chores;
 
         /// <summary>Construct an instance</summary>
         /// <param name="monitor">Encapsulates monitoring and logging.</param>
         /// <param name="chores">The custom chores.</param>
-        internal CustomChoresAPI(IMonitor monitor, IDictionary<string, ICustomChore> chores)
+        internal CustomChoresApi(IMonitor monitor, IDictionary<string, ICustomChore> chores)
         {
-            this.Monitor = monitor;
-            this.Chores = chores;
+            this._monitor = monitor;
+            this._chores = chores;
         }
 
         /// <summary>Add a new custom chore to the game.</summary>
         /// <param name="chore">A chore which performs one or more in-game tasks.</param>
         public void AddCustomChore(ICustomChore chore)
         {
-            this.Monitor.Log($"Adding custom chore: {chore.GetType().AssemblyQualifiedName}", LogLevel.Trace);
-            this.Chores.Add(chore.ChoreName, chore);
+            this._monitor.Log($"Adding custom chore: {chore.GetType().AssemblyQualifiedName}", LogLevel.Trace);
+            this._chores.Add(chore.ChoreName, chore);
         }
     }
 }

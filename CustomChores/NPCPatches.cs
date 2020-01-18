@@ -4,28 +4,28 @@ using StardewValley;
 
 namespace LeFauxMatt.CustomChores
 {
-    internal class NPCPatches
+    internal class NpcPatches
     {
-        private static IMonitor Monitor;
+        private static IMonitor _monitor;
 
         public static void Initialize(IMonitor monitor)
         {
-            Monitor = monitor;
+            _monitor = monitor;
         }
 
-        public static void marriageDuties_Prefix()
+        public static void MarriageDuties_Prefix()
         {
             try
             {
                 // Prevent default chores from occurring
-                StardewValley.NPC.hasSomeoneFedTheAnimals = true;
-                StardewValley.NPC.hasSomeoneFedThePet = true;
-                StardewValley.NPC.hasSomeoneRepairedTheFences = true;
-                StardewValley.NPC.hasSomeoneWateredCrops = true;
+                NPC.hasSomeoneFedTheAnimals = true;
+                NPC.hasSomeoneFedThePet = true;
+                NPC.hasSomeoneRepairedTheFences = true;
+                NPC.hasSomeoneWateredCrops = true;
             }
             catch (Exception ex)
             {
-                Monitor.Log($"Failed in {nameof(marriageDuties_Prefix)}:\n{ex}", LogLevel.Error);
+                _monitor.Log($"Failed in {nameof(MarriageDuties_Prefix)}:\n{ex}", LogLevel.Error);
             }
         }
     }

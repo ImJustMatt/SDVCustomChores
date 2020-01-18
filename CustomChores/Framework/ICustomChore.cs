@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LeFauxMatt.CustomChores.Framework
+﻿namespace LeFauxMatt.CustomChores.Framework
 {
     public interface ICustomChore
     {
@@ -24,7 +18,7 @@ namespace LeFauxMatt.CustomChores.Framework
         bool DoIt();
 
         /// <summary>Performs the chore.</summary>
-        /// <param name="spouseName">The name of the spouse.</param>
-        string GetDialogue(string spouseName);
+        /// <param name="name">The name of the spouse.</param>
+        string GetDialogue(string name);
     }
 }

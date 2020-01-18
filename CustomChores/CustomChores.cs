@@ -18,16 +18,19 @@ namespace LeFauxMatt.CustomChores
         ** Fields
         *********/
         /// <summary>Custom Chores API.</summary>
-        private CustomChoresAPI API;
+        private CustomChoresApi _api;
 
         /// <summary>The mod configuration.</summary>
-        private ModConfig Config;
+        private ModConfig _config;
 
         /// <summary>The custom chores.</summary>
-        private readonly IDictionary<string, ICustomChore> Chores = new Dictionary<string, ICustomChore>();
+        private readonly IDictionary<string, ICustomChore> _chores = new Dictionary<string, ICustomChore>();
 
-        /// <summary>The custom chores.</summary>
-        private IEnumerable<Translation> Dialogues;
+        /// <summary>The dialogue that the spouses will say in the morning depending on what chore(s) they were able to.</summary>
+        private IEnumerable<Translation> _dialogues;
+
+        /// <summary>The spouses that will be able to perform chores.</summary>
+        private readonly IDictionary<string, IList<CustomChoreConfig>> _spouses = new Dictionary<string, IList<CustomChoreConfig>>();
 
         /*********
         ** Public methods
@@ -36,37 +39,66 @@ namespace LeFauxMatt.CustomChores
         /// <param name="helper">Provides simplified APIs for writing mods.</param>
         public override void Entry(IModHelper helper)
         {
-            this.Config = Helper.ReadConfig<ModConfig>();
-            this.API = new CustomChoresAPI(this.Monitor, this.Chores);
+            _config = Helper.ReadConfig<ModConfig>();
+            _api = new CustomChoresApi(Monitor, _chores);
 
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
 
-            helper.ConsoleCommands.Add("chore_listall", "List all available chores by name.", this.ListChores);
-            helper.ConsoleCommands.Add("chore_doit", "Performs the custom chore on demand.\n\nUsage: chore_doit <value>\n- value: the chore name.", this.DoChore);
-            helper.ConsoleCommands.Add("chore_candoit", "Checks if the current conditions allows a custom chore to be done.\n\nUsage: chore_candoit <value>\n- value: the chore name.", this.CanDoChore);
+            helper.ConsoleCommands.Add("chore_ListAll", "List all available chores by name.", this.ListChores);
+            helper.ConsoleCommands.Add("chore_DoIt",
+                "Performs the custom chore on demand.\n\nUsage: chore_DoIt <value>\n- value: the chore name.",
+                this.DoChore);
+            helper.ConsoleCommands.Add("chore_CanDoIt",
+                "Checks if the current conditions allows a custom chore to be done.\n\nUsage: chore_CanDoIt <value>\n- value: the chore name.",
+                this.CanDoChore);
 
-            Dialogues = helper.Translation.GetTranslations();
+            _dialogues = helper.Translation.GetTranslations();
 
             if (!helper.Translation.GetTranslations().Any())
-                this.Config.EnableDialogue = false;
+                _config.EnableDialogue = false;
+
+            foreach (var spouse in _config.Spouses)
+            {
+                try
+                {
+                    var chores = spouse.Value
+                        .Split('\\')
+                        .Select((t) => t.Split(' '))
+                        .Select((t) => new CustomChoreConfig(t[0], Convert.ToDouble(t[1])))
+                        .ToList();
+                    _spouses.Add(spouse.Key, chores);
+                }
+                catch (Exception ex)
+                {
+                    Monitor.Log($"An error occured while parsing the log entry for {spouse.Key}", LogLevel.Error);
+                }
+            }
         }
 
         public override object GetApi()
         {
-            return new CustomChoresAPI(this.Monitor, this.Chores);
+            return new CustomChoresApi(Monitor, _chores);
         }
 
-        internal string GetDialogue(string spouseName, string choreName)
+        internal string GetDialogue(string name, string chore)
         {
-            IList<Translation> dialogues = Dialogues.Where(dialogue => dialogue.Key.Contains($"{spouseName}.{choreName}")).ToList();
+            // Try to get individual dialogue
+            var dialogues =
+                _dialogues.Where(dialogue => dialogue.Key.StartsWith($"{name}.{chore}", StringComparison.CurrentCultureIgnoreCase)).ToList();
 
+            // Try to get global dialogue
+            if (dialogues.Count == 0)
+                dialogues = _dialogues.Where(dialogue => dialogue.Key.StartsWith($"default.{chore}", StringComparison.CurrentCultureIgnoreCase)).ToList();
+
+            // Return null string
             if (dialogues.Count == 0)
                 return (string) null;
-            
-            Random rnd = new Random();
-            int index = rnd.Next(dialogues.Count);
-            
+
+            // Return random dialogue of all that meet criteria
+            var rnd = new Random();
+            var index = rnd.Next(dialogues.Count);
+
             return dialogues[index].Tokens(new
             {
                 playerName = Game1.player.Name,
@@ -88,16 +120,16 @@ namespace LeFauxMatt.CustomChores
             // Patch to prevent default chores
             harmony.Patch(
                 original: AccessTools.Method(typeof(StardewValley.NPC), nameof(StardewValley.NPC.marriageDuties)),
-                prefix: new HarmonyMethod(typeof(NPCPatches), nameof(NPCPatches.marriageDuties_Prefix))
+                prefix: new HarmonyMethod(typeof(NpcPatches), nameof(NpcPatches.MarriageDuties_Prefix))
             );
 
             // Load default chores
-            this.API.AddCustomChore(new FeedTheAnimals(this));
-            this.API.AddCustomChore(new FeedThePet(this));
-            this.API.AddCustomChore(new PetTheAnimals(this));
-            this.API.AddCustomChore(new RepairTheFences(this));
-            this.API.AddCustomChore(new WaterTheCrops(this));
-            this.API.AddCustomChore(new WaterTheSlimes(this));
+            _api.AddCustomChore(new FeedTheAnimals(this));
+            _api.AddCustomChore(new FeedThePet(this));
+            _api.AddCustomChore(new PetTheAnimals(this));
+            _api.AddCustomChore(new RepairTheFences(this));
+            _api.AddCustomChore(new WaterTheCrops(this));
+            _api.AddCustomChore(new WaterTheSlimes(this));
         }
 
         /// <summary>
@@ -108,96 +140,95 @@ namespace LeFauxMatt.CustomChores
         /// <param name="e">The event arguments.</param>
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
-            Random r = new Random((int)Game1.stats.DaysPlayed + (int)Game1.uniqueIDForThisGame / 2 + (int)Game1.player.UniqueMultiplayerID);
+            var r = new Random((int) Game1.stats.DaysPlayed + (int) Game1.uniqueIDForThisGame / 2 +
+                                  (int) Game1.player.UniqueMultiplayerID);
 
-            if (Game1.timeOfDay != 600 || !Game1.player.isMarried() || r.NextDouble() >= Config.GlobalChance)
+            if (Game1.timeOfDay != 600 || !Game1.player.isMarried() || r.NextDouble() >= _config.GlobalChance)
                 return;
 
             // Get spouse
-            NPC spouse = Game1.player.getSpouse();
+            var spouse = Game1.player.getSpouse();
             if (spouse == null)
                 return;
 
             // Get spouse chores
-            Config.Spouses.TryGetValue(spouse.Name, out IList<CustomChoreConfig> chores);
+            _spouses.TryGetValue(spouse.Name, out var chores);
             if (chores == null)
                 return;
 
             // Get spouse hearts
-            Game1.player.friendshipData.TryGetValue(spouse.Name, out Friendship friendship);
-            int spouseHearts = friendship.Points / NPC.friendshipPointsPerHeartLevel;
-            if (spouseHearts < Config.HeartsNeeded && Config.HeartsNeeded > 0)
+            Game1.player.friendshipData.TryGetValue(spouse.Name, out var friendship);
+            var spouseHearts = friendship.Points / NPC.friendshipPointsPerHeartLevel;
+            if (spouseHearts < _config.HeartsNeeded && _config.HeartsNeeded > 0)
                 return;
 
-            int choresDone = Config.DailyLimit;
-            bool didIt;
-            List<string> npcDialogue = new List<string>();
-            string dialogue;
+            var choresDone = _config.DailyLimit;
+            var npcDialogue = new List<string>();
 
-            foreach (CustomChoreConfig choreConfig in chores)
+            foreach (var choreConfig in chores)
             {
-                if (r.NextDouble() < choreConfig.Chance)
+                if (r.NextDouble() >= choreConfig.Chance)
+                    continue;
+
+                _chores.TryGetValue(choreConfig.ChoreName, out var chore);
+                if (chore == null)
+                    continue;
+                if (!chore.CanDoIt())
+                    continue;
+
+                Monitor.Log($"Attempting to perform chore {choreConfig.ChoreName}:\n", LogLevel.Trace);
+
+                bool didIt;
+                try
                 {
-                    Chores.TryGetValue(choreConfig.ChoreName, out ICustomChore chore);
-                    if (chore == null)
-                        continue;
-                    if (!chore.CanDoIt())
-                        continue;
-
-                    Monitor.Log($"Attempting to perform chore {choreConfig.ChoreName}:\n", LogLevel.Trace);
-
-                    try
-                    {
-                        didIt = chore.DoIt();
-                    }
-                    catch (Exception ex)
-                    {
-                        Monitor.Log($"Failed to perform chore {choreConfig.ChoreName}:\n{ex}", LogLevel.Error);
-                        didIt = false;
-                    }
-
-                    if (didIt)
-                    {
-                        --choresDone;
-                        if (Config.EnableDialogue)
-                        {
-                            dialogue = chore.GetDialogue(spouse.Name);
-                            if (dialogue != null && dialogue != "")
-                                npcDialogue.Add(dialogue);
-                        }
-                    }
-
-                    if (choresDone <= 0)
-                        break;
+                    didIt = chore.DoIt();
                 }
+                catch (Exception ex)
+                {
+                    Monitor.Log($"Failed to perform chore {choreConfig.ChoreName}:\n{ex}", LogLevel.Error);
+                    didIt = false;
+                }
+
+                if (!didIt)
+                    continue;
+
+                if (_config.EnableDialogue)
+                {
+                    var dialogue = chore.GetDialogue(spouse.Name);
+                    if (!string.IsNullOrEmpty(dialogue))
+                        npcDialogue.Add(dialogue);
+                }
+
+                --choresDone;
+                if (choresDone <= 0)
+                    break;
             }
 
-            if (npcDialogue.Count > 0)
-            {
-                int index = r.Next(npcDialogue.Count);
-                Game1.drawDialogue(spouse, npcDialogue[index]);
-            }
+            if (npcDialogue.Count == 0)
+                return;
+
+            var index = r.Next(npcDialogue.Count);
+            Game1.drawDialogue(spouse, npcDialogue[index]);
         }
 
-        /// <summary>Lists all chores by name when 'chore_listall' command is invoked.</summary>
+        /// <summary>Lists all chores by name when 'chore_ListAll' command is invoked.</summary>
         /// <param name="command">The name of the command invoked.</param>
         /// <param name="args">The arguments received by the command. Each word after the command name is a separate argument.</param>
         private void ListChores(string command, string[] args)
         {
-            foreach (string choreName in this.Chores.Keys)
+            foreach (var choreName in this._chores.Keys)
             {
                 this.Monitor.Log($"- {choreName}.", LogLevel.Info);
             }
         }
 
-        /// <summary>Performs a custom chore on demand when 'chore_doit' command is invoked.</summary>
+        /// <summary>Performs a custom chore on demand when 'chore_DoIt' command is invoked.</summary>
         /// <param name="command">The name of the command invoked.</param>
         /// <param name="args">The arguments received by the command. Each word after the command name is a separate argument.</param>
         private void DoChore(string command, string[] args)
         {
-            ICustomChore chore = null;
-            string choreName = args[0];
-            this.Chores.TryGetValue(choreName, out chore);
+            var choreName = args[0];
+            this._chores.TryGetValue(choreName, out var chore);
 
             if (chore != null)
             {
@@ -211,26 +242,18 @@ namespace LeFauxMatt.CustomChores
             }
         }
 
-        /// <summary>Returns current condition for custom chore when 'chore_candoit' command is invoked.</summary>
+        /// <summary>Returns current condition for custom chore when 'chore_CanDoIt' command is invoked.</summary>
         /// <param name="command">The name of the command invoked.</param>
         /// <param name="args">The arguments received by the command. Each word after the command name is a separate argument.</param>
         private void CanDoChore(string command, string[] args)
         {
-            ICustomChore chore = null;
-            string choreName = args[0];
-            this.Chores.TryGetValue(choreName, out chore);
+            this._chores.TryGetValue(args[0], out var chore);
 
             if (chore != null)
-            {
-                if (chore.CanDoIt())
-                    this.Monitor.Log($"Can do custom chore {choreName}.", LogLevel.Info);
-                else
-                    this.Monitor.Log($"Cannot do custom chore {choreName}.", LogLevel.Info);
-            }
+                this.Monitor.Log((chore.CanDoIt() ? "Can" : "Cannot") + $" do custom chore {args[0]}.",
+                    LogLevel.Info);
             else
-            {
-                this.Monitor.Log($"No chore found with name {choreName}", LogLevel.Info);
-            }
+                this.Monitor.Log($"No chore found with name {args[0]}", LogLevel.Info);
         }
     }
 }

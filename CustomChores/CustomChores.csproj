@@ -51,6 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Framework\BaseCustomChore.cs" />
     <Compile Include="Framework\Chores\FeedTheAnimals.cs" />
     <Compile Include="Framework\Chores\FeedThePet.cs" />
     <Compile Include="Framework\Chores\PetTheAnimals.cs" />

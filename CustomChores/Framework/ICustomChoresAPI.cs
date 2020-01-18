@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace LeFauxMatt.CustomChores.Framework
+﻿namespace LeFauxMatt.CustomChores.Framework
 {
-    public interface ICustomChoresAPI
+    public interface ICustomChoresApi
     {
         /// <summary>Add a chore.</summary>
         void AddCustomChore(ICustomChore chore);
