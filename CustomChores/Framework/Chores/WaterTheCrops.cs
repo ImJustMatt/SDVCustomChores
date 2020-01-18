@@ -1,50 +1,38 @@
-﻿using StardewModdingAPI;
-using StardewValley;
+﻿using StardewValley;
 using StardewValley.TerrainFeatures;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
 {
-    class WaterTheCrops: ICustomChore
+    internal class WaterTheCrops : BaseCustomChore
     {
-        public string ChoreName { get; } = "WaterTheCrops";
-
-        private readonly CustomChores ModInstance;
-
+        public override string ChoreName { get; } = "WaterTheCrops";
         public WaterTheCrops(CustomChores instance)
-        {
-            this.ModInstance = instance;
-        }
+            : base(instance) { }
 
-        public bool CanDoIt()
+        public override bool CanDoIt()
         {
             return !Game1.isRaining && !Game1.currentSeason.Equals("winter");
         }
 
-        public bool DoIt()
+        public override bool DoIt()
         {
-            bool success = false;
+            var success = false;
 
-            foreach (GameLocation location in Game1.locations)
+            foreach (var location in Game1.locations)
             {
                 if (!location.IsFarm && !location.IsGreenhouse)
                     continue;
 
-                foreach (TerrainFeature terrainFeature in location.terrainFeatures.Values)
+                foreach (var terrainFeature in location.terrainFeatures.Values)
                 {
-                    if (terrainFeature is HoeDirt dirt)
-                    {
-                        dirt.state.Value = HoeDirt.watered;
-                        success = true;
-                    }
+                    if (!(terrainFeature is HoeDirt dirt))
+                        continue;
+                    dirt.state.Value = HoeDirt.watered;
+                    success = true;
                 }
             }
 
             return success;
-        }
-
-        public string GetDialogue(string spouseName)
-        {
-            return ModInstance.GetDialogue(spouseName, ChoreName);
         }
     }
 }

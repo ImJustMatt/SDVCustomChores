@@ -1,49 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using StardewModdingAPI;
+﻿using System.Linq;
 using StardewValley;
 using StardewValley.Buildings;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
 {
-    class FeedTheAnimals: ICustomChore
+    internal class FeedTheAnimals : BaseCustomChore
     {
-        public string ChoreName { get; } = "FeedTheAnimals";
-
-        private readonly CustomChores ModInstance;
-
+        public override string ChoreName { get; } = "FeedTheAnimals";
         public FeedTheAnimals(CustomChores instance)
-        {
-            this.ModInstance = instance;
-        }
+            : base(instance) { }
 
-        public bool CanDoIt()
+        public override bool CanDoIt()
         {
             return Game1.getFarm().getAllFarmAnimals().Count > 0;
         }
 
-        public bool DoIt()
+        public override bool DoIt()
         {
-            bool success = false;
+            var success = false;
 
-            foreach (Building building in Game1.getFarm().buildings)
+            foreach (var building in Game1.getFarm().buildings.Where(building => building.daysOfConstructionLeft.Value <= 0).Where(building => building is Barn || building is Coop))
             {
-                if (building.daysOfConstructionLeft.Value > 0)
-                    continue;
-
-                if (building is Barn || building is Coop)
-                {
-                    (building.indoors.Value as AnimalHouse).feedAllAnimals();
-                    success = true;
-                }
+                (building.indoors.Value as AnimalHouse)?.feedAllAnimals();
+                success = true;
             }
 
             return success;
-        }
-
-        public string GetDialogue(string spouseName)
-        {
-            return ModInstance.GetDialogue(spouseName, ChoreName);
         }
     }
 }

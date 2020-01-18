@@ -1,56 +1,35 @@
-﻿using StardewModdingAPI;
+﻿using System.Linq;
 using StardewValley;
-using SObject = StardewValley.Object;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
 {
-    class RepairTheFences: ICustomChore
+    internal class RepairTheFences : BaseCustomChore
     {
-        public string ChoreName { get; } = "RepairTheFences";
-
-        private readonly CustomChores ModInstance;
-
+        public override string ChoreName { get; } = "RepairTheFences";
         public RepairTheFences(CustomChores instance)
+            : base(instance) { }
+
+        public override bool CanDoIt()
         {
-            this.ModInstance = instance;
+            return Game1.locations.SelectMany(location => location.objects.Values).OfType<Fence>().Any();
         }
 
-        public bool CanDoIt()
+        public override bool DoIt()
         {
-            foreach (GameLocation location in Game1.locations)
+            var success = false;
+
+            foreach (var location in Game1.locations)
             {
-                foreach (SObject obj in location.objects.Values)
+                foreach (var obj in location.objects.Values)
                 {
-                    if (obj is Fence)
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
-        public bool DoIt()
-        {
-            bool success = false;
-
-            foreach (GameLocation location in Game1.locations)
-            {
-                foreach (SObject obj in location.objects.Values)
-                {
-                    if (obj is Fence fence)
-                    {
-                        fence.repair();
-                        success = true;
-                    }
+                    if (!(obj is Fence fence))
+                        continue;
+                    fence.repair();
+                    success = true;
                 }
             }
 
             return success;
-        }
-
-        public string GetDialogue(string spouseName)
-        {
-            return ModInstance.GetDialogue(spouseName, ChoreName);
         }
     }
 }
