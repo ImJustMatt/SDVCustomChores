@@ -1,27 +1,24 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
 {
-    internal class WaterTheSlimes : ICustomChore
+    internal class WaterTheSlimes : BaseCustomChore
     {
-        public string ChoreName { get; } = "WaterTheSlimes";
+        public override string ChoreName { get; } = "WaterTheSlimes";
+        public WaterTheSlimes(CustomChores instance, IDictionary<string, string> config)
+            : base(instance, config) { }
 
-        private readonly CustomChores _modInstance;
-
-        public WaterTheSlimes(CustomChores instance)
-        {
-            this._modInstance = instance;
-        }
-
-        public bool CanDoIt()
+        public override bool CanDoIt(string name = null)
         {
             return Game1.getFarm().buildings
                 .Where(building => building.daysOfConstructionLeft.Value <= 0)
                 .Any(building => building.indoors.Value is SlimeHutch);
         }
 
-        public bool DoIt()
+        public override bool DoIt(string name = null)
         {
             var success = false;
 
@@ -35,11 +32,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             }
 
             return success;
-        }
-
-        public string GetDialogue(string spouseName)
-        {
-            return _modInstance.GetDialogue(spouseName, ChoreName);
         }
     }
 }

@@ -17,8 +17,6 @@ namespace LeFauxMatt.CustomChores
         /*********
         ** Fields
         *********/
-        /// <summary>Custom Chores API.</summary>
-        private CustomChoresApi _api;
 
         /// <summary>The mod configuration.</summary>
         private ModConfig _config;
@@ -40,7 +38,6 @@ namespace LeFauxMatt.CustomChores
         public override void Entry(IModHelper helper)
         {
             _config = Helper.ReadConfig<ModConfig>();
-            _api = new CustomChoresApi(Monitor, _chores);
 
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.DayStarted += this.OnDayStarted;
@@ -81,7 +78,7 @@ namespace LeFauxMatt.CustomChores
             return new CustomChoresApi(Monitor, _chores);
         }
 
-        internal string GetDialogue(string name, string chore)
+        internal Translation GetDialogue(string name, string chore)
         {
             // Try to get individual dialogue
             var dialogues =
@@ -93,7 +90,7 @@ namespace LeFauxMatt.CustomChores
 
             // Return null string
             if (dialogues.Count == 0)
-                return (string) null;
+                return (Translation) null;
 
             // Return random dialogue of all that meet criteria
             var rnd = new Random();
@@ -124,12 +121,21 @@ namespace LeFauxMatt.CustomChores
             );
 
             // Load default chores
-            _api.AddCustomChore(new FeedTheAnimals(this));
-            _api.AddCustomChore(new FeedThePet(this));
-            _api.AddCustomChore(new PetTheAnimals(this));
-            _api.AddCustomChore(new RepairTheFences(this));
-            _api.AddCustomChore(new WaterTheCrops(this));
-            _api.AddCustomChore(new WaterTheSlimes(this));
+            TryAddChore<FeedTheAnimals>("FeedTheAnimals");
+            TryAddChore<FeedThePet>("FeedThePet");
+            TryAddChore<GiveAGift>("GiveAGift");
+            TryAddChore<PetTheAnimals>("PetTheAnimals");
+            TryAddChore<RepairTheFences>("RepairTheFences");
+            TryAddChore<WaterTheCrops>("WaterTheCrops");
+            TryAddChore<WaterTheSlimes>("WaterTheSlimes");
+        }
+
+        private void TryAddChore<T>(string name) where T: class, ICustomChore
+        {
+            _config.Chores.TryGetValue(name, out var config);
+            if (config == null)
+                config = new Dictionary<string, string> { };
+            _chores.Add(name, Activator.CreateInstance(typeof(T), new object[] { this, config }) as T);
         }
 
         /// <summary>
@@ -194,21 +200,14 @@ namespace LeFauxMatt.CustomChores
 
                 if (_config.EnableDialogue)
                 {
-                    var dialogue = chore.GetDialogue(spouse.Name);
-                    if (!string.IsNullOrEmpty(dialogue))
-                        npcDialogue.Add(dialogue);
+                    var dialogueText = chore.GetDialogue(spouse.Name);
+                    if (!string.IsNullOrWhiteSpace(dialogueText))
+                        spouse.setNewDialogue(dialogueText, true);
                 }
 
-                --choresDone;
-                if (choresDone <= 0)
+                if (--choresDone <= 0)
                     break;
             }
-
-            if (npcDialogue.Count == 0)
-                return;
-
-            var index = r.Next(npcDialogue.Count);
-            Game1.drawDialogue(spouse, npcDialogue[index]);
         }
 
         /// <summary>Lists all chores by name when 'chore_ListAll' command is invoked.</summary>
@@ -227,18 +226,17 @@ namespace LeFauxMatt.CustomChores
         /// <param name="args">The arguments received by the command. Each word after the command name is a separate argument.</param>
         private void DoChore(string command, string[] args)
         {
-            var choreName = args[0];
-            this._chores.TryGetValue(choreName, out var chore);
+            this._chores.TryGetValue(args[0], out var chore);
 
             if (chore != null)
             {
-                this.Monitor.Log($"Attempting to perform chore {choreName}.", LogLevel.Info);
+                this.Monitor.Log($"Attempting to perform chore {args[0]}.", LogLevel.Info);
                 if (chore.CanDoIt())
                     chore.DoIt();
             }
             else
             {
-                this.Monitor.Log($"No chore found with name {choreName}", LogLevel.Info);
+                this.Monitor.Log($"No chore found with name {args[0]}", LogLevel.Info);
             }
         }
 

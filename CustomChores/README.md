@@ -28,6 +28,7 @@ The default chores are as follows:
 
 * `FeedTheAnimals`
 * `FeedThePet`
+* `GiveAGift`
 * `PetTheAnimals`
 * `RepairTheFences`
 * `WaterTheCrops`

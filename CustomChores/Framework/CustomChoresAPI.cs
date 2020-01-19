@@ -18,11 +18,12 @@ namespace LeFauxMatt.CustomChores.Framework
         }
 
         /// <summary>Add a new custom chore to the game.</summary>
+        /// <param name="name">The name of the chore for config/commands.</param>
         /// <param name="chore">A chore which performs one or more in-game tasks.</param>
-        public void AddCustomChore(ICustomChore chore)
+        public void AddCustomChore(string name, ICustomChore chore)
         {
             this._monitor.Log($"Adding custom chore: {chore.GetType().AssemblyQualifiedName}", LogLevel.Trace);
-            this._chores.Add(chore.ChoreName, chore);
+            this._chores.Add(name, chore);
         }
     }
 }

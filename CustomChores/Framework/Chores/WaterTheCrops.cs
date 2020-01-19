@@ -1,4 +1,8 @@
-﻿using StardewValley;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using StardewValley;
+using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
@@ -6,33 +10,53 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
     internal class WaterTheCrops : BaseCustomChore
     {
         public override string ChoreName { get; } = "WaterTheCrops";
-        public WaterTheCrops(CustomChores instance)
-            : base(instance) { }
 
-        public override bool CanDoIt()
+        private IEnumerable<HoeDirt> _hoeDirt;
+        private readonly bool _enableFarm;
+        private readonly bool _enableBuildings;
+        private readonly bool _enableGreenhouse;
+
+        public WaterTheCrops(CustomChores instance, IDictionary<string, string> config) : base(instance, config)
         {
-            return !Game1.isRaining && !Game1.currentSeason.Equals("winter");
+            Config.TryGetValue("EnableFarm", out var enableFarm);
+            Config.TryGetValue("EnableBuildings", out var enableBuildings);
+            Config.TryGetValue("EnableGreenhouse", out var enableGreenhouse);
+
+            _enableFarm = (enableFarm == null) || Convert.ToBoolean(enableFarm);
+            _enableBuildings = (enableBuildings == null) || Convert.ToBoolean(enableBuildings);
+            _enableGreenhouse = (enableGreenhouse == null) || Convert.ToBoolean(enableGreenhouse);
         }
 
-        public override bool DoIt()
+        public override bool CanDoIt(string name = null)
         {
-            var success = false;
+            if (Game1.isRaining || Game1.currentSeason.Equals("winter"))
+                return false;
+            
+            var locations = Game1.locations
+                .Where(location => (_enableFarm && location.IsFarm) || (_enableGreenhouse && location.IsGreenhouse));
+            
+            if (_enableBuildings)
+                locations = locations.Concat(
+                    from location in Game1.locations.OfType<BuildableGameLocation>()
+                    from building in location.buildings
+                    where building.indoors.Value != null
+                    select building.indoors.Value);
+            
+            _hoeDirt = locations
+                .SelectMany(location => location.terrainFeatures.Values)
+                .OfType<HoeDirt>();
 
-            foreach (var location in Game1.locations)
+            return _hoeDirt.Any();
+        }
+
+        public override bool DoIt(string name = null)
+        {
+            foreach (var hoeDirt in _hoeDirt)
             {
-                if (!location.IsFarm && !location.IsGreenhouse)
-                    continue;
-
-                foreach (var terrainFeature in location.terrainFeatures.Values)
-                {
-                    if (!(terrainFeature is HoeDirt dirt))
-                        continue;
-                    dirt.state.Value = HoeDirt.watered;
-                    success = true;
-                }
+                hoeDirt.state.Value = HoeDirt.watered;
             }
 
-            return success;
+            return true;
         }
     }
 }
