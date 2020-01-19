@@ -70,18 +70,21 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
             // Get objects by category
             var objectsFromCats = Game1.objectInformation
-                .Where(objectInfo =>
-                    itemCats.Contains(Convert.ToInt32(objectInfo.Value.Split('/')[3].Split(' ')[1])));
+                .Select(objectInfo => new KeyValuePair<int,string[]>(objectInfo.Key, objectInfo.Value.Split('/')[3].Split(' ')))
+                .Where(objectInfo => objectInfo.Value.Length == 2 && itemCats.Contains(Convert.ToInt32(objectInfo.Value[1])))
+                .Select(objectInfo => objectInfo.Key)
+                .ToList();
 
             // Get objects by id
             var objectsFromIds = Game1.objectInformation
-                .Where(objectInfo => itemIds.Contains(Convert.ToInt32(objectInfo.Key)));
+                .Select(objectInfo => objectInfo.Key)
+                .Where(itemId => itemIds.Contains(itemId))
+                .ToList();
 
             // Get unique objects from both lists
-            var objects = objectsFromIds
-                .Concat(objectsFromCats
-                    .Where(objectInfo =>
-                        !itemIds.Contains(Convert.ToInt32(objectInfo.Key))))
+            var objects = Game1.objectInformation
+                .Where(objectInfo =>
+                    objectsFromCats.Contains(objectInfo.Key) || objectsFromIds.Contains(objectInfo.Key))
                 .ToList();
 
             // Get random object from list
@@ -99,7 +102,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             // Try to get dialogue for character - unique, gender, then any
             var dialogues =
                 ModInstance.GetDialogue(name, ChoreName + "." + _todayBirthdayNpc.Name)
-                ?? ModInstance.GetDialogue(name, ChoreName + "." + (_todayBirthdayNpc.Gender == 1 ? "Him" : "Her"))
+                ?? ModInstance.GetDialogue(name, ChoreName + "." + (_todayBirthdayNpc.Gender == 1 ? "Her" : "Him"))
                 ?? ModInstance.GetDialogue(name, ChoreName);
 
             return dialogues.Tokens(new 
