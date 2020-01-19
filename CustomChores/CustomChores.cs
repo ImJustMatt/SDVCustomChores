@@ -123,6 +123,7 @@ namespace LeFauxMatt.CustomChores
             // Load default chores
             TryAddChore<FeedTheAnimals>("FeedTheAnimals");
             TryAddChore<FeedThePet>("FeedThePet");
+            TryAddChore<GiveAGift>("GiveAGift");
             TryAddChore<PetTheAnimals>("PetTheAnimals");
             TryAddChore<RepairTheFences>("RepairTheFences");
             TryAddChore<WaterTheCrops>("WaterTheCrops");
