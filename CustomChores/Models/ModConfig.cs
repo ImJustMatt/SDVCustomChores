@@ -5,10 +5,10 @@ namespace LeFauxMatt.CustomChores.Models
     public class ModConfig
     {
         /// <summary>The maximum number of chores any spouse will perform in one day.</summary>
-        public int DailyLimit { get; set; } = 3;
+        public int DailyLimit { get; set; } = 2;
 
         /// <summary>The minimum number of hearts required for spouse to perform any chore.</summary>
-        public int HeartsNeeded { get; set; } = 10;
+        public int HeartsNeeded { get; set; } = 12;
 
         /// <summary>Overall chance that any chore gets performed.</summary>
         public double GlobalChance { get; set; } = 1;
