@@ -133,6 +133,8 @@ namespace LeFauxMatt.CustomChores
         private void TryAddChore<T>(string name) where T: class, ICustomChore
         {
             _config.Chores.TryGetValue(name, out var config);
+            if (config == null)
+                config = new Dictionary<string, string> { };
             _chores.Add(name, Activator.CreateInstance(typeof(T), new object[] { this, config }) as T);
         }
 
