@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using StardewValley;
 using StardewValley.Buildings;
 
@@ -7,25 +9,39 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
     internal class FeedTheAnimals : BaseCustomChore
     {
         public override string ChoreName { get; } = "FeedTheAnimals";
-        public FeedTheAnimals(CustomChores instance)
-            : base(instance) { }
 
-        public override bool CanDoIt()
+        private IEnumerable<AnimalHouse> _animalHouses;
+        private readonly bool _enableBarns;
+        private readonly bool _enableCoops;
+
+        public FeedTheAnimals(CustomChores instance, IDictionary<string, string> config) : base(instance, config)
         {
-            return Game1.getFarm().getAllFarmAnimals().Count > 0;
+            Config.TryGetValue("EnableBarns", out var enableBarns);
+            Config.TryGetValue("EnableCoops", out var enableCoops);
+
+            _enableBarns = (enableBarns == null) || Convert.ToBoolean(enableBarns);
+            _enableCoops = (enableCoops == null) || Convert.ToBoolean(enableCoops);
         }
 
-        public override bool DoIt()
+        public override bool CanDoIt(string name = null)
         {
-            var success = false;
+            _animalHouses = Game1.getFarm().buildings
+                .Where(building => building.daysOfConstructionLeft.Value <= 0)
+                .Where(building => (_enableBarns && building is Barn) || (_enableCoops && building is Coop))
+                .Select(building => building.indoors.Value)
+                .OfType<AnimalHouse>();
+            
+            return _animalHouses.Any();
+        }
 
-            foreach (var building in Game1.getFarm().buildings.Where(building => building.daysOfConstructionLeft.Value <= 0).Where(building => building is Barn || building is Coop))
+        public override bool DoIt(string name = null)
+        {
+            foreach (var animalHouse in _animalHouses)
             {
-                (building.indoors.Value as AnimalHouse)?.feedAllAnimals();
-                success = true;
+                animalHouse.feedAllAnimals();
             }
 
-            return success;
+            return true;
         }
     }
 }
