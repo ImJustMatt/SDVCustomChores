@@ -1,20 +1,25 @@
-﻿namespace LeFauxMatt.CustomChores.Framework
+﻿using System.Collections.Generic;
+using System.Dynamic;
+
+namespace LeFauxMatt.CustomChores.Framework
 {
     internal abstract class BaseCustomChore : ICustomChore
     {
-        private readonly CustomChores _modInstance;
+        protected readonly CustomChores ModInstance;
+        protected IDictionary<string, string> Config;
         public abstract string ChoreName { get; }
-        protected BaseCustomChore(CustomChores instance)
+        protected BaseCustomChore(CustomChores instance, IDictionary<string, string> config)
         {
-            this._modInstance = instance;
+            ModInstance = instance;
+            Config = config;
         }
 
-        public abstract bool CanDoIt();
-        public abstract bool DoIt();
+        public abstract bool CanDoIt(string name = null);
+        public abstract bool DoIt(string name = null);
 
-        public string GetDialogue(string name)
+        public virtual string GetDialogue(string name)
         {
-            return _modInstance.GetDialogue(name, ChoreName);
+            return ModInstance.GetDialogue(name, ChoreName);
         }
     }
 }

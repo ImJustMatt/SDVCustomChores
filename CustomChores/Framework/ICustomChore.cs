@@ -12,10 +12,10 @@
         ** Public methods
         *********/
         /// <summary>Returns true if chore can be performed in current days conditions.</summary>
-        bool CanDoIt();
+        bool CanDoIt(string name = null);
 
         /// <summary>Performs the chore.</summary>
-        bool DoIt();
+        bool DoIt(string name = null);
 
         /// <summary>Performs the chore.</summary>
         /// <param name="name">The name of the spouse.</param>
