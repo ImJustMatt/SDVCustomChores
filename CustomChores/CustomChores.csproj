@@ -54,6 +54,7 @@
     <Compile Include="Framework\BaseCustomChore.cs" />
     <Compile Include="Framework\Chores\FeedTheAnimals.cs" />
     <Compile Include="Framework\Chores\FeedThePet.cs" />
+    <Compile Include="Framework\Chores\GiveAGift.cs" />
     <Compile Include="Framework\Chores\PetTheAnimals.cs" />
     <Compile Include="Framework\Chores\RepairTheFences.cs" />
     <Compile Include="Framework\Chores\WaterTheCrops.cs" />
@@ -78,6 +79,7 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Pathoschild.Stardew.ModBuildConfig.2.2.0\build\Pathoschild.Stardew.ModBuildConfig.targets" Condition="Exists('..\packages\Pathoschild.Stardew.ModBuildConfig.2.2.0\build\Pathoschild.Stardew.ModBuildConfig.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
