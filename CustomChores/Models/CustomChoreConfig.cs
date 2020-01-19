@@ -2,7 +2,7 @@
 
 namespace LeFauxMatt.CustomChores.Models
 {
-    public class CustomChoreConfig
+    internal class CustomChoreConfig
     {
         public string ChoreName { get; set; }
         public double Chance { get; set; }
