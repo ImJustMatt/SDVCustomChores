@@ -6,5 +6,9 @@
    "UniqueID": "furyx639.CustomChores",
    "EntryDll": "CustomChores.dll",
    "MinimumApiVersion": "2.0",
-   "UpdateKeys": ["Nexus:5175"]
+   "UpdateKeys": [
+	   "Nexus:5175",
+	   "ModDrop:717888",
+	   "GitHub:ImJustMatt/StardewValleyMod"
+   ]
 }
