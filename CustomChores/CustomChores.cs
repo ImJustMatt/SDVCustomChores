@@ -52,9 +52,6 @@ namespace LeFauxMatt.CustomChores
 
             _dialogues = helper.Translation.GetTranslations();
 
-            if (!helper.Translation.GetTranslations().Any())
-                _config.EnableDialogue = false;
-
             foreach (var spouse in _config.Spouses)
             {
                 try
@@ -78,11 +75,18 @@ namespace LeFauxMatt.CustomChores
             return new CustomChoresApi(Monitor, _chores);
         }
 
-        internal Translation GetDialogue(string name, string chore)
+        internal Translation GetDialogue(NPC spouse, string chore)
         {
             // Try to get individual dialogue
             var dialogues =
-                _dialogues.Where(dialogue => dialogue.Key.StartsWith($"{name}.{chore}", StringComparison.CurrentCultureIgnoreCase)).ToList();
+                _dialogues.Where(dialogue => dialogue.Key.StartsWith($"{spouse.getName()}.{chore}", StringComparison.CurrentCultureIgnoreCase)).ToList();
+
+            // Try to get gender dialogue
+            if (dialogues.Count == 0)
+            {
+                var gender = spouse.Gender == 1 ? "Female" : "Male";
+                dialogues = _dialogues.Where(dialogue => dialogue.Key.StartsWith($"{gender}.{chore}", StringComparison.CurrentCultureIgnoreCase)).ToList();
+            }
 
             // Try to get global dialogue
             if (dialogues.Count == 0)
@@ -168,8 +172,8 @@ namespace LeFauxMatt.CustomChores
             if (spouseHearts < _config.HeartsNeeded && _config.HeartsNeeded > 0)
                 return;
 
-            var choresDone = _config.DailyLimit;
-            var npcDialogue = new List<string>();
+            // Generate list of chore options for today
+            var choreList = new List<ICustomChore>();
 
             foreach (var choreConfig in chores)
             {
@@ -182,28 +186,35 @@ namespace LeFauxMatt.CustomChores
                 if (!chore.CanDoIt())
                     continue;
 
-                Monitor.Log($"Attempting to perform chore {choreConfig.ChoreName}:\n", LogLevel.Trace);
+                choreList.Add(chore);
+            }
 
+            // Attempt to perform chores from options
+            var choresDone = _config.DailyLimit;
+            choreList.Shuffle();
+
+            foreach (var chore in choreList)
+            {
                 bool didIt;
+
+                Monitor.Log($"Attempting to perform chore {chore.ChoreName}:\n", LogLevel.Trace);
+
                 try
                 {
                     didIt = chore.DoIt();
                 }
                 catch (Exception ex)
                 {
-                    Monitor.Log($"Failed to perform chore {choreConfig.ChoreName}:\n{ex}", LogLevel.Error);
+                    Monitor.Log($"Failed to perform chore {chore.ChoreName}:\n{ex}", LogLevel.Error);
                     didIt = false;
                 }
 
                 if (!didIt)
                     continue;
 
-                if (_config.EnableDialogue)
-                {
-                    var dialogueText = chore.GetDialogue(spouse.Name);
-                    if (!string.IsNullOrWhiteSpace(dialogueText))
-                        spouse.setNewDialogue(dialogueText, true);
-                }
+                var dialogueText = chore.GetDialogue(spouse);
+                if (!string.IsNullOrWhiteSpace(dialogueText))
+                    spouse.setNewDialogue(dialogueText, true);
 
                 if (--choresDone <= 0)
                     break;
@@ -252,6 +263,24 @@ namespace LeFauxMatt.CustomChores
                     LogLevel.Info);
             else
                 this.Monitor.Log($"No chore found with name {args[0]}", LogLevel.Info);
+        }
+    }
+
+    internal static class MyExtensions
+    {
+        private static readonly Random Rng = new Random();
+
+        internal static void Shuffle<T>(this IList<T> list)
+        {
+            var n = list.Count;
+            while (n > 1)
+            {
+                --n;
+                var k = Rng.Next(n + 1);
+                var value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
         }
     }
 }
