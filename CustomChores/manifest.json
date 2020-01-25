@@ -1,7 +1,7 @@
 ﻿{
    "Name": "CustomChores",
    "Author": "furyx639",
-   "Version": "0.2.0",
+   "Version": "0.3.0",
    "Description": "Completely customize chores",
    "UniqueID": "furyx639.CustomChores",
    "EntryDll": "CustomChores.dll",
