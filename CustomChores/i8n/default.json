@@ -1,0 +1,11 @@
+{
+    // Default dialogue (overridden by individual characters)
+    "Default.FeedTheAnimals": "Good morning {{nickName}}, I fed all of the animals today.",
+    "Default.FeedThePet": "Good morning {{nickName}}, I filled {{petName}}'s water bowl.",
+    "Default.GiveAGift.Her": "It's {{npcName}}'s birthday today! I went and bought a gift for you to give to her.[{{itemId}}]",
+    "Default.GiveAGift.Him": "It's {{npcName}}'s birthday today! I went and bought a gift for you to give to him.[{{itemId}}]",
+    "Default.PetTheAnimals": "Good morning {{nickName}}, I pet all of the animals in the barn and coop.",
+    "Default.RepairTheFences": "Good morning {{nickName}}, I repaired some of the fences.",
+    "Default.WaterTheCrops": "Good morning {{nickName}}, I watered the crops for you today.",
+    "Default.WaterTheSlimes": "Good morning {{nickName}}, I filled the slimes troughs with water."
+}
