@@ -1,4 +1,6 @@
-﻿namespace LeFauxMatt.CustomChores.Framework
+﻿using StardewValley;
+
+namespace LeFauxMatt.CustomChores.Framework
 {
     public interface ICustomChore
     {
@@ -18,7 +20,7 @@
         bool DoIt(string name = null);
 
         /// <summary>Performs the chore.</summary>
-        /// <param name="name">The name of the spouse.</param>
-        string GetDialogue(string name);
+        /// <param name="spouse">A reference to the spouse saying the Dialogue</param>
+        string GetDialogue(NPC spouse);
     }
 }

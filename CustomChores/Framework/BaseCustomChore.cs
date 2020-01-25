@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Dynamic;
+using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework
 {
@@ -17,9 +17,9 @@ namespace LeFauxMatt.CustomChores.Framework
         public abstract bool CanDoIt(string name = null);
         public abstract bool DoIt(string name = null);
 
-        public virtual string GetDialogue(string name)
+        public virtual string GetDialogue(NPC spouse)
         {
-            return ModInstance.GetDialogue(name, ChoreName);
+            return ModInstance.GetDialogue(spouse, ChoreName);
         }
     }
 }

@@ -97,13 +97,13 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return true;
         }
 
-        public override string GetDialogue(string name)
+        public override string GetDialogue(NPC spouse)
         {
             // Try to get dialogue for character - unique, gender, then any
             var dialogues =
-                ModInstance.GetDialogue(name, ChoreName + "." + _todayBirthdayNpc.Name)
-                ?? ModInstance.GetDialogue(name, ChoreName + "." + (_todayBirthdayNpc.Gender == 1 ? "Her" : "Him"))
-                ?? ModInstance.GetDialogue(name, ChoreName);
+                ModInstance.GetDialogue(spouse, ChoreName + "." + _todayBirthdayNpc.Name)
+                ?? ModInstance.GetDialogue(spouse, ChoreName + "." + (_todayBirthdayNpc.Gender == 1 ? "Her" : "Him"))
+                ?? ModInstance.GetDialogue(spouse, ChoreName);
 
             return dialogues.Tokens(new 
             {
