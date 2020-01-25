@@ -5,5 +5,5 @@ This is a repo for the SMAPI mods that I have created. For all of my Stardew mod
 ## Mods
 
 * **[Custom Chores](https://www.nexusmods.com/stardewvalley/mods/5175)** <small>([source](./CustomChores))</small>
- _Adds configurable custom chores to the game for Spouses (and Krobus).
- _It's intended to make spouses more helpful around the farm in a balanced/lore-friendly way.
+  _Adds configurable custom chores to the game for Spouses (and Krobus).
+  _It's intended to make spouses more helpful around the farm in a balanced/lore-friendly way.
