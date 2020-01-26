@@ -44,12 +44,15 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override Translation GetDialogue(NPC spouse)
         {
-            var rnd = new Random();
-            var index = rnd.Next(0, _farmAnimals.Count());
+            var farmAnimals =
+                from farmAnimal in Game1.getFarm().getAllFarmAnimals()
+                where (_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn")) ||
+                      (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop"))
+                select farmAnimal;
 
             return base.GetDialogue(spouse).Tokens(new
             {
-                animalName = _farmAnimals.ElementAt(index).Name
+                animalName = farmAnimals.Shuffle().First().Name
             });
         }
     }

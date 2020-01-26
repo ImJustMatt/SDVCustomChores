@@ -13,7 +13,8 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         private readonly bool _enableBarns;
         private readonly bool _enableCoops;
 
-        public FeedTheAnimals(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue) : base(choreName, config, dialogue)
+        public FeedTheAnimals(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue) :
+            base(choreName, config, dialogue)
         {
             Config.TryGetValue("EnableBarns", out var enableBarns);
             Config.TryGetValue("EnableCoops", out var enableCoops);
@@ -48,8 +49,8 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         {
             var farmAnimals =
                 from farmAnimal in Game1.getFarm().getAllFarmAnimals()
-                where ((_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn")) ||
-                       (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop")))
+                where (_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn")) ||
+                      (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop"))
                 select farmAnimal;
 
             return base.GetDialogue(spouse).Tokens(new
