@@ -1,4 +1,5 @@
-﻿using StardewValley;
+﻿using StardewModdingAPI;
+using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework
 {
@@ -17,6 +18,6 @@ namespace LeFauxMatt.CustomChores.Framework
 
         /// <summary>Performs the chore.</summary>
         /// <param name="spouse">A reference to the farmer's spouse.</param>
-        string GetDialogue(NPC spouse);
+        Translation GetDialogue(NPC spouse);
     }
 }

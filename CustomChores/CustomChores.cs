@@ -173,7 +173,7 @@ namespace LeFauxMatt.CustomChores
                 {
                     if (chore.Value.DoIt(spouse))
                     {
-                        var dialogueText = chore.Value.GetDialogue(spouse);
+                        string dialogueText = chore.Value.GetDialogue(spouse);
                         if (!string.IsNullOrWhiteSpace(dialogueText))
                             spouse.setNewDialogue(dialogueText, true);
                         if (--choresDone <= 0)

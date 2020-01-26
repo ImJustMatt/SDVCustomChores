@@ -57,7 +57,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             {
                 hoeDirt.state.Value = HoeDirt.watered;
             }
-
+            
             return true;
         }
     }

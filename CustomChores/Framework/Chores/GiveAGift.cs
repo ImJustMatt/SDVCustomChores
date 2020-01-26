@@ -103,7 +103,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return true;
         }
 
-        public override string GetDialogue(NPC spouse)
+        public override Translation GetDialogue(NPC spouse)
         {
             var spouseName = spouse.getName();
             var spouseGender = spouse.Gender == 1 ? "Female" : "Male";
@@ -183,7 +183,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
             // Return default empty string
             if (!dialogues.Any())
-                return $"[{_itemName}]";
+                return (Translation) null;
 
             // Return random dialogue of all that meet criteria
             var rnd = new Random();

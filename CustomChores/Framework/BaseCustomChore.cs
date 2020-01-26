@@ -22,7 +22,7 @@ namespace LeFauxMatt.CustomChores.Framework
         public abstract bool CanDoIt(NPC spouse);
         public abstract bool DoIt(NPC spouse);
 
-        public virtual string GetDialogue(NPC spouse)
+        public virtual Translation GetDialogue(NPC spouse)
         {
             var spouseGender = spouse.Gender == 1 ? "Female" : "Male";
 
@@ -53,6 +53,13 @@ namespace LeFauxMatt.CustomChores.Framework
             if (!dialogues.Any())
                 return (Translation)null;
 
+            // Avoid dialogue that makes references to non-existing entities
+            dialogues =
+                from dialogue in dialogues
+                where (Game1.player.getPet() != null || dialogue.ToString().IndexOf("{{petName}}", StringComparison.CurrentCultureIgnoreCase) == -1) &&
+                      (Game1.player.getChildrenCount() > 0 || dialogue.ToString().IndexOf("{{childName}}", StringComparison.CurrentCultureIgnoreCase) == -1)
+                select dialogue;
+
             // Return random dialogue of all that meet criteria
             var rnd = new Random();
             var index = rnd.Next(0, dialogues.Count());
@@ -61,7 +68,8 @@ namespace LeFauxMatt.CustomChores.Framework
             {
                 playerName = Game1.player.Name,
                 nickName = Game1.player.getSpouse().getTermOfSpousalEndearment(),
-                petName = Game1.player.getPetName()
+                petName = Game1.player.getPetName(),
+                childName = Game1.player.getChildren()[rnd.Next(Game1.player.getChildrenCount())]?.Name
             });
         }
     }

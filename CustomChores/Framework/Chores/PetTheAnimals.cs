@@ -41,5 +41,16 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
             return true;
         }
+
+        public override Translation GetDialogue(NPC spouse)
+        {
+            var rnd = new Random();
+            var index = rnd.Next(0, _farmAnimals.Count());
+
+            return base.GetDialogue(spouse).Tokens(new
+            {
+                animalName = _farmAnimals.ElementAt(index).Name
+            });
+        }
     }
 }

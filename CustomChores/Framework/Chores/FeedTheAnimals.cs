@@ -43,5 +43,19 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
             return true;
         }
+
+        public override Translation GetDialogue(NPC spouse)
+        {
+            var farmAnimals =
+                from farmAnimal in Game1.getFarm().getAllFarmAnimals()
+                where ((_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn")) ||
+                       (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop")))
+                select farmAnimal;
+
+            return base.GetDialogue(spouse).Tokens(new
+            {
+                animalName = farmAnimals.Shuffle().First().Name
+            });
+        }
     }
 }
