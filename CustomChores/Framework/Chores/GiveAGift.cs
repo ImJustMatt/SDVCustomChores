@@ -211,13 +211,10 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
             // Return default empty string
             if (!dialogues.Any())
-                return (Translation) null;
+                return Dialogues.First();
 
             // Return random dialogue of all that meet criteria
-            var rnd = new Random();
-            var index = rnd.Next(0, dialogues.Count());
-
-            return dialogues.ElementAt(index).Tokens(new
+            return dialogues.Shuffle().First().Tokens(new
             {
                 playerName = Game1.player.Name,
                 nickName = Game1.player.getSpouse().getTermOfSpousalEndearment(),
