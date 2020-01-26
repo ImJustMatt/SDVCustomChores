@@ -23,27 +23,28 @@ namespace LeFauxMatt.CustomChores.Models
         {
             // Default Marriage Candidates (and Krobus)
             Spouses.Add("Alex", "FeedThePet 1\\PetTheAnimals 0.6\\FeedTheAnimals 0.6");
-            Spouses.Add("Elliott", "GiveAGift.Birthday 0.6\\WaterTheCrops 0.6\\RepairTheFences 0.7");
+            Spouses.Add("Elliott", "GiveAGift.Birthday 0.6\\WaterTheCrops 0.6\\GiveAGift.Cooking 0.7");
             Spouses.Add("Harvey", "WaterTheSlimes 0.6\\FeedThePet 0.8\\WaterTheCrops 0.6");
             Spouses.Add("Sam", "FeedThePet 0.6\\GiveAGift.Birthday 0.4\\PetTheAnimals 0.5");
             Spouses.Add("Sebastian", "FeedThePet 0.6\\WaterTheSlimes 0.6\\GiveAGift.Birthday 0.4");
             Spouses.Add("Shane","FeedThePet 1\\PetTheAnimals 0.8\\FeedTheAnimals 0.8");
             Spouses.Add("Abigail", "PetTheAnimals 0.7\\WaterTheSlimes 0.6\\GiveAGift.Birthday 0.5");
-            Spouses.Add("Emily", "GiveAGift.Birthday 0.8\\FeedThePet 0.8\\PetTheAnimals 0.8");
-            Spouses.Add("Haley", "PetTheAnimals 0.5\\GiveAGift.Birthday 0.5\\FeedTheAnimals 0.4");
+            Spouses.Add("Emily", "GiveAGift.Birthday 0.8\\GiveAGift.Cooking 0.8\\PetTheAnimals 0.8");
+            Spouses.Add("Haley", "PetTheAnimals 0.5\\GiveAGift.Birthday 0.5\\GiveAGift.Cooking 0.4");
             Spouses.Add("Leah", "GiveAGift.Birthday 0.7\\WaterTheCrops 0.6\\RepairTheFences 0.5");
             Spouses.Add("Maru", "RepairTheFences 0.8\\GiveAGift.Birthday 0.7\\WaterTheCrops 0.6");
-            Spouses.Add("Penny", "FeedThePet 0.9\\PetTheAnimals 0.8\\GiveAGift.Birthday 0.7");
+            Spouses.Add("Penny", "FeedThePet 0.9\\PetTheAnimals 0.8\\GiveAGift.Cooking 0.7");
             Spouses.Add("Krobus","WaterTheSlimes 1");
 
             // SVE Marriage Candidates (TBD)
-            Spouses.Add("Olivia", "GiveAGift.Birthday 0.8\\PetTheAnimals 0.6\\WaterTheCrops 0.4");
+            Spouses.Add("Olivia", "GiveAGift.Birthday 0.8\\PetTheAnimals 0.6\\GiveAGift.Cooking 0.4");
             Spouses.Add("Victor", "GiveAGift.Birthday 0.8\\PetTheAnimals 0.6\\WaterTheCrops 0.4");
 
             // Default Chores
             Chores.Add("FeedTheAnimals", new Dictionary<string, string>() {{"EnableBarns", "true"}, {"EnableCoops", "true"}});
             Chores.Add("FeedThePet", new Dictionary<string, string>() { });
             Chores.Add("GiveAGift.Birthday", new Dictionary<string, string>() {{"Type", "Birthday"}, {"EnableUniversal", "false"}, {"ChanceForLove", "0.1"}});
+            Chores.Add("GiveAGift.Cooking", new Dictionary<string, string>() { { "Type", "-7" } });
             Chores.Add("PetTheAnimals", new Dictionary<string, string>() {{"EnableBarns", "true"}, {"EnableCoops", "true"}});
             Chores.Add("RepairTheFences", new Dictionary<string, string>() {{"EnableFarm", "true"}, {"EnableBuildings", "true"}, {"EnableOutdoors", "true"}});
             Chores.Add("WaterTheCrops", new Dictionary<string, string>() {{"EnableFarm", "true"}, { "EnableBuildings", "true"}, {"EnableGreenhouse", "true"}});

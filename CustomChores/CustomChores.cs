@@ -68,35 +68,18 @@ namespace LeFauxMatt.CustomChores
                     Monitor.Log($"An error occured while parsing the log entry for {spouse.Key}", LogLevel.Error);
                 }
             }
-
-            // Load default chores
-            foreach (var choreConfig in _config.Chores)
-            {
-                if (choreConfig.Key.StartsWith("FeedTheAnimals", StringComparison.CurrentCultureIgnoreCase))
-                    TryAddChore<FeedTheAnimals>("FeedTheAnimals", choreConfig);
-                else if (choreConfig.Key.StartsWith("FeedThePet", StringComparison.CurrentCultureIgnoreCase))
-                    TryAddChore<FeedThePet>("FeedThePet", choreConfig);
-                else if (choreConfig.Key.StartsWith("GiveAGift", StringComparison.CurrentCultureIgnoreCase))
-                    TryAddChore<GiveAGift>("GiveAGift", choreConfig);
-                else if (choreConfig.Key.StartsWith("PetTheAnimals", StringComparison.CurrentCultureIgnoreCase))
-                    TryAddChore<PetTheAnimals>("PetTheAnimals", choreConfig);
-                else if (choreConfig.Key.StartsWith("RepairTheFences", StringComparison.CurrentCultureIgnoreCase))
-                    TryAddChore<RepairTheFences>("RepairTheFences", choreConfig);
-                else if (choreConfig.Key.StartsWith("WaterTheCrops", StringComparison.CurrentCultureIgnoreCase))
-                    TryAddChore<WaterTheCrops>("WaterTheCrops", choreConfig);
-                else if (choreConfig.Key.StartsWith("WaterTheSlimes", StringComparison.CurrentCultureIgnoreCase))
-                    TryAddChore<WaterTheSlimes>("WaterTheSlimes", choreConfig);
-            }
         }
 
-        private void TryAddChore<T>(string choreName, KeyValuePair<string, IDictionary<string, string>> choreConfig) where T : class, ICustomChore
+        private void TryAddChore<T>(string choreName, KeyValuePair<string, IDictionary<string, string>> choreConfig)
+            where T : class, ICustomChore
         {
             var dialogues =
                 from dialogue in _dialogues
                 where dialogue.Key.IndexOf(choreName,
                           StringComparison.CurrentCultureIgnoreCase) >= 0
                 select dialogue;
-            _chores.Add(choreConfig.Key, Activator.CreateInstance(typeof(T), new object[] { choreConfig.Key, choreConfig.Value, dialogues }) as T);
+            _chores.Add(choreConfig.Key,
+                Activator.CreateInstance(typeof(T), new object[] {choreConfig.Key, choreConfig.Value, dialogues}) as T);
         }
 
         public override object GetApi()
@@ -123,6 +106,25 @@ namespace LeFauxMatt.CustomChores
                 original: AccessTools.Method(typeof(StardewValley.NPC), nameof(StardewValley.NPC.marriageDuties)),
                 prefix: new HarmonyMethod(typeof(NpcPatches), nameof(NpcPatches.MarriageDuties_Prefix))
             );
+
+            // Load default chores
+            foreach (var choreConfig in _config.Chores)
+            {
+                if (choreConfig.Key.StartsWith("FeedTheAnimals", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<FeedTheAnimals>("FeedTheAnimals", choreConfig);
+                else if (choreConfig.Key.StartsWith("FeedThePet", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<FeedThePet>("FeedThePet", choreConfig);
+                else if (choreConfig.Key.StartsWith("GiveAGift", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<GiveAGift>("GiveAGift", choreConfig);
+                else if (choreConfig.Key.StartsWith("PetTheAnimals", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<PetTheAnimals>("PetTheAnimals", choreConfig);
+                else if (choreConfig.Key.StartsWith("RepairTheFences", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<RepairTheFences>("RepairTheFences", choreConfig);
+                else if (choreConfig.Key.StartsWith("WaterTheCrops", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<WaterTheCrops>("WaterTheCrops", choreConfig);
+                else if (choreConfig.Key.StartsWith("WaterTheSlimes", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<WaterTheSlimes>("WaterTheSlimes", choreConfig);
+            }
         }
 
         /// <summary>

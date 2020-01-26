@@ -2,8 +2,9 @@
     // Default dialogue (overridden by individual characters)
     "default.FeedTheAnimals": "Good morning {{nickName}}, I fed all of the animals today.",
     "default.FeedThePet": "Good morning {{nickName}}, I filled {{petName}}'s water bowl.",
-    "default.GiveAGift.birthday.her": "It's {{npcName}}'s birthday today! I went and bought a gift for you to give to her.[{{itemId}}]",
-    "default.GiveAGift.birthday.him": "It's {{npcName}}'s birthday today! I went and bought a gift for you to give to him.[{{itemId}}]",
+    "default.GiveAGift.cooking":  "Good morning {{nickName}}, I cooked you some breakfast this morning. I hope you enjoy it!{{itemId}}",
+    "default.GiveAGift.birthday.her": "It's {{npcName}}'s birthday today! I went and bought a gift for you to give to her.{{itemId}}",
+    "default.GiveAGift.birthday.him": "It's {{npcName}}'s birthday today! I went and bought a gift for you to give to him.{{itemId}}",
     "default.PetTheAnimals": "Good morning {{nickName}}, I pet all of the animals in the barn and coop.",
     "default.RepairTheFences": "Good morning {{nickName}}, I repaired some of the fences.",
     "default.WaterTheCrops": "Good morning {{nickName}}, I watered the crops for you today.",
@@ -29,5 +30,8 @@
     "Emily.WaterTheCrops": "The crops looks so happy this morning when I went to water them. They love the soil here, I can tell.",
     "Emily.WaterTheSlimes.1": "I just filled the water for the slime hutch! Oh no, {{playerName}}, even when they attack us it doesn't upset me. They're just doing what is instinct for them. It's part of their nature, and there's nothing wrong with that, even if we don't understand it.",
     "Emily.WaterTheSlimes.2": "I know they're a bit dangerous, but I think slimes are so beautiful. When light passes through their bodies, they remind me of gemstones!",
-    "Emily.WaterTheSlimes.3": "I gave the slimes water again. Even though they seem less complex than other farm animals, they still deserve respect like any other creature. We all live on the same planet, after all."
+    "Emily.WaterTheSlimes.3": "I gave the slimes water again. Even though they seem less complex than other farm animals, they still deserve respect like any other creature. We all live on the same planet, after all.",
+    // Krobus dialogue
+    "Krobus.WaterTheSlimes":  "I like visiting the slimes, they remind me of the sewers.",
+    "Krobus.GiveAGift.Cooking": "Umm... I found this food lying around. I thought you might like it...{{itemId}}"
 }

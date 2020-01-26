@@ -13,10 +13,13 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         private readonly string _giftType;
         private readonly bool _enableUniversal;
         private readonly double _chanceForLove;
+        private readonly IEnumerable<int> _universalLoves;
+        private readonly IEnumerable<int> _universalLikes;
         private string _itemName;
         private int _itemId;
 
-        public GiveAGift(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue) : base(choreName, config, dialogue)
+        public GiveAGift(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue) :
+            base(choreName, config, dialogue)
         {
             Config.TryGetValue("Type", out var giftType);
             Config.TryGetValue("EnableUniversal", out var enableUniversal);
@@ -25,6 +28,18 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _giftType = !string.IsNullOrWhiteSpace(giftType) ? giftType : "Birthday";
             _enableUniversal = !string.IsNullOrWhiteSpace(enableUniversal) && Convert.ToBoolean(enableUniversal);
             _chanceForLove = !string.IsNullOrWhiteSpace(chanceForLove) ? Convert.ToDouble(chanceForLove) : 0.1;
+
+            Game1.NPCGiftTastes.TryGetValue("Universal_Love", out var universalLoves);
+            if (!string.IsNullOrWhiteSpace(universalLoves))
+                _universalLoves =
+                    from s in universalLoves.Split(' ')
+                    select Convert.ToInt32(s);
+
+            Game1.NPCGiftTastes.TryGetValue("Universal_Like", out var universalLikes);
+            if (universalLikes != null)
+                _universalLikes =
+                    from s in universalLikes.Split(' ')
+                    select Convert.ToInt32(s);
         }
 
         public override bool CanDoIt(NPC spouse)
@@ -42,31 +57,36 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             
             var itemIds = new List<int>();
 
-            Game1.NPCGiftTastes.TryGetValue(_todayBirthdayNpc.getName(), out var personalGifts);
-
-            var personalData = personalGifts?.Split('/');
-
-            if (personalData == null)
-                return false;
-
-            if (r.NextDouble() < _chanceForLove)
-            {
-                itemIds.AddRange(personalData[1].Split(' ').Select(s => Convert.ToInt32(s)));
-                if (_enableUniversal)
-                {
-                    Game1.NPCGiftTastes.TryGetValue("Universal_Love", out var universalLoveGifts);
-                    if (universalLoveGifts != null)
-                        itemIds.AddRange(universalLoveGifts.Split(' ').Select(s => Convert.ToInt32(s)));
-                }
+            if (!_giftType.Equals("Birthday", StringComparison.CurrentCultureIgnoreCase))
+            { 
+                itemIds.AddRange(
+                    from itemId in _giftType.Split(',')
+                    select Convert.ToInt32(itemId));
             }
             else
             {
-                itemIds.AddRange(personalData[3].Split(' ').Select(s => Convert.ToInt32(s)));
-                if (_enableUniversal)
+                Game1.NPCGiftTastes.TryGetValue(_todayBirthdayNpc.getName(), out var personalGifts);
+
+                var personalData = personalGifts?.Split('/');
+
+                if (personalData == null)
+                    return false;
+
+                if (r.NextDouble() < _chanceForLove)
                 {
-                    Game1.NPCGiftTastes.TryGetValue("Universal_Like", out var universalLoveGifts);
-                    if (universalLoveGifts != null)
-                        itemIds.AddRange(universalLoveGifts.Split(' ').Select(s => Convert.ToInt32(s)));
+                    itemIds.AddRange(
+                        from s in personalData[1].Split(' ')
+                        select Convert.ToInt32(s));
+                    if (_enableUniversal)
+                        itemIds.AddRange(_universalLoves);
+                }
+                else
+                {
+                    itemIds.AddRange(
+                        from s in personalData[3].Split(' ')
+                        select Convert.ToInt32(s));
+                    if (_enableUniversal)
+                        itemIds.AddRange(_universalLikes);
                 }
             }
 
@@ -107,6 +127,14 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         {
             var spouseName = spouse.getName();
             var spouseGender = spouse.Gender == 1 ? "Female" : "Male";
+
+            if (!_giftType.Equals("Birthday", StringComparison.CurrentCultureIgnoreCase))
+                return base.GetDialogue(spouse).Tokens(new
+                {
+                    itemName = _itemName,
+                    itemId = "[" + _itemId + "]"
+                });
+
             var otherName = _todayBirthdayNpc.getName();
             var otherGender = _todayBirthdayNpc.Gender == 1 ? "Her" : "Him";
 
@@ -195,7 +223,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                 nickName = Game1.player.getSpouse().getTermOfSpousalEndearment(),
                 petName = Game1.player.getPetName(),
                 itemName = _itemName,
-                itemId = _itemId,
+                itemId = "[" + _itemId + "]",
                 npcName = _todayBirthdayNpc.Name
             });
         }
