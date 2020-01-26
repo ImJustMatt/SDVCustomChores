@@ -10,7 +10,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
     internal class WaterTheSlimes : BaseCustomChore
     {
         private IEnumerable<SlimeHutch> _slimeHutches;
-        public WaterTheSlimes(string choreName, IDictionary<string, string> config, IList<Translation> dialogue)
+        public WaterTheSlimes(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue)
             : base(choreName, config, dialogue) { }
 
         public override bool CanDoIt(string name = null)

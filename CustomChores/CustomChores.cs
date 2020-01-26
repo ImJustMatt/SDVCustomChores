@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Harmony;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -28,7 +29,7 @@ namespace LeFauxMatt.CustomChores
         private IEnumerable<Translation> _dialogues;
 
         /// <summary>The spouses that will be able to perform chores.</summary>
-        private readonly IDictionary<string, IList<CustomChoreConfig>> _spouses = new Dictionary<string, IList<CustomChoreConfig>>();
+        private readonly IDictionary<string, IEnumerable<CustomChoreConfig>> _spouses = new Dictionary<string, IEnumerable<CustomChoreConfig>>();
 
         /*********
         ** Public methods
@@ -59,8 +60,7 @@ namespace LeFauxMatt.CustomChores
                     var chores = spouse.Value
                         .Split('\\')
                         .Select((t) => t.Split(' '))
-                        .Select((t) => new CustomChoreConfig(t[0], Convert.ToDouble(t[1])))
-                        .ToList();
+                        .Select((t) => new CustomChoreConfig(t[0], Convert.ToDouble(t[1])));
                     _spouses.Add(spouse.Key, chores);
                 }
                 catch (Exception ex)
@@ -91,9 +91,11 @@ namespace LeFauxMatt.CustomChores
 
         private void TryAddChore<T>(string choreName, KeyValuePair<string, IDictionary<string, string>> choreConfig) where T : class, ICustomChore
         {
-            var dialogues = _dialogues
-                .Where(dialogue => choreName.IndexOf(dialogue.Key, StringComparison.CurrentCultureIgnoreCase) >= 0)
-                .ToList();
+            var dialogues =
+                from dialogue in _dialogues
+                where choreName.IndexOf(dialogue.Key,
+                          StringComparison.CurrentCultureIgnoreCase) >= 0
+                select dialogue;
             _chores.Add(choreConfig.Key, Activator.CreateInstance(typeof(T), new object[] { choreConfig.Key, choreConfig.Value, dialogues }) as T);
         }
 
@@ -143,8 +145,8 @@ namespace LeFauxMatt.CustomChores
                 return;
 
             // Get spouse chores
-            _spouses.TryGetValue(spouse.Name, out var chores);
-            if (chores == null)
+            _spouses.TryGetValue(spouse.Name, out var spouseConfig);
+            if (spouseConfig == null || !spouseConfig.Any())
                 return;
 
             // Get spouse hearts
@@ -154,17 +156,17 @@ namespace LeFauxMatt.CustomChores
                 return;
 
             // Generate list of chore options for today
-            var choreList = _chores
-                .Where(chore =>
-                    chores.Any(choreConfig =>
-                        r.NextDouble() >= choreConfig.Chance && choreConfig.ChoreName.Equals(chore.Key)) && chore.Value.CanDoIt())
-                .ToList();
+            var choreList =
+                from chore in _chores
+                where spouseConfig.Any(choreConfig =>
+                          r.NextDouble() >= choreConfig.Chance &&
+                          choreConfig.ChoreName.Equals(chore.Key)) &&
+                      chore.Value.CanDoIt()
+                select chore;
 
             // Attempt to perform chores from options
             var choresDone = _config.DailyLimit;
-            choreList.Shuffle();
-
-            foreach (var chore in choreList)
+            foreach (var chore in choreList.Shuffle().Take(_config.DailyLimit))
             {
                 Monitor.Log($"Attempting to perform chore {chore.Key}:\n", LogLevel.Trace);
                 try
@@ -230,20 +232,32 @@ namespace LeFauxMatt.CustomChores
         }
     }
 
-    internal static class MyExtensions
+    internal static class EnumerableExtensions
     {
-        private static readonly Random Rng = new Random();
-
-        internal static void Shuffle<T>(this IList<T> list)
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
         {
-            var n = list.Count;
-            while (n > 1)
+            return source.Shuffle(new Random());
+        }
+
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random rng)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+            if (rng == null)
+                throw new ArgumentNullException(nameof(rng));
+            return source.ShuffleIterator(rng);
+        }
+
+        private static IEnumerable<T> ShuffleIterator<T>(
+            this IEnumerable<T> source, Random rng)
+        {
+            var buffer = source.ToList();
+            for (var i = 0; i < buffer.Count; i++)
             {
-                --n;
-                var k = Rng.Next(n + 1);
-                var value = list[k];
-                list[k] = list[n];
-                list[n] = value;
+                var j = rng.Next(i, buffer.Count);
+                yield return buffer[j];
+
+                buffer[j] = buffer[i];
             }
         }
     }

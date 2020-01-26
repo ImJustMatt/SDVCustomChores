@@ -12,7 +12,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         private readonly bool _enableBarns;
         private readonly bool _enableCoops;
 
-        public PetTheAnimals(string choreName, IDictionary<string, string> config, IList<Translation> dialogue) : base(choreName, config, dialogue)
+        public PetTheAnimals(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue) : base(choreName, config, dialogue)
         {
             Config.TryGetValue("EnableBarns", out var enableBarns);
             Config.TryGetValue("EnableCoops", out var enableCoops);

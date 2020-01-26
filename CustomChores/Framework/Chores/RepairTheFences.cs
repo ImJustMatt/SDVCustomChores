@@ -4,7 +4,6 @@ using System.Linq;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
-using SObject = StardewValley.Object;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
 {
@@ -15,7 +14,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         private readonly bool _enableBuildings;
         private readonly bool _enableOutdoors;
 
-        public RepairTheFences(string choreName, IDictionary<string, string> config, IList<Translation> dialogue) : base(choreName, config, dialogue)
+        public RepairTheFences(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue) : base(choreName, config, dialogue)
         {
             Config.TryGetValue("EnableFarm", out var enableFarm);
             Config.TryGetValue("EnableBuildings", out var enableBuildings);

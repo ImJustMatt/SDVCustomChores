@@ -15,7 +15,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         private readonly bool _enableBuildings;
         private readonly bool _enableGreenhouse;
 
-        public WaterTheCrops(string choreName, IDictionary<string, string> config, IList<Translation> dialogue) : base(choreName, config, dialogue)
+        public WaterTheCrops(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue) : base(choreName, config, dialogue)
         {
             Config.TryGetValue("EnableFarm", out var enableFarm);
             Config.TryGetValue("EnableBuildings", out var enableBuildings);

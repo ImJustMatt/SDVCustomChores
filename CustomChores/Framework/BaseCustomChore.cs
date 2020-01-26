@@ -10,9 +10,9 @@ namespace LeFauxMatt.CustomChores.Framework
     {
         internal readonly string ChoreName;
         protected IDictionary<string, string> Config;
-        protected IList<Translation> Dialogues;
+        protected IEnumerable<Translation> Dialogues;
 
-        protected BaseCustomChore(string choreName, IDictionary<string, string> config, IList<Translation> dialogue)
+        protected BaseCustomChore(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue)
         {
             ChoreName = choreName;
             Config = config;

@@ -6,7 +6,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class FeedThePet: BaseCustomChore
     {
-        public FeedThePet(string choreName, IDictionary<string, string> config, IList<Translation> dialogue)
+        public FeedThePet(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue)
             : base(choreName, config, dialogue) { }
 
         public override bool CanDoIt(string name = null)
