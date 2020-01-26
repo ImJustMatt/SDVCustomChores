@@ -5,12 +5,6 @@ namespace LeFauxMatt.CustomChores.Framework
     public interface ICustomChore
     {
         /*********
-        ** Accessors
-        *********/
-        /// <summary>A unique name for the custom chore.</summary>
-        string ChoreName { get; }
-
-        /*********
         ** Public methods
         *********/
         /// <summary>Returns true if chore can be performed in current days conditions.</summary>

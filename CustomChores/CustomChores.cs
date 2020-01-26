@@ -68,6 +68,33 @@ namespace LeFauxMatt.CustomChores
                     Monitor.Log($"An error occured while parsing the log entry for {spouse.Key}", LogLevel.Error);
                 }
             }
+
+            // Load default chores
+            foreach (var choreConfig in _config.Chores)
+            {
+                if (choreConfig.Key.StartsWith("FeedTheAnimals", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<FeedTheAnimals>("FeedTheAnimals", choreConfig);
+                else if (choreConfig.Key.StartsWith("FeedThePet", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<FeedThePet>("FeedThePet", choreConfig);
+                else if (choreConfig.Key.StartsWith("GiveAGift", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<GiveAGift>("GiveAGift", choreConfig);
+                else if (choreConfig.Key.StartsWith("PetTheAnimals", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<PetTheAnimals>("PetTheAnimals", choreConfig);
+                else if (choreConfig.Key.StartsWith("RepairTheFences", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<RepairTheFences>("RepairTheFences", choreConfig);
+                else if (choreConfig.Key.StartsWith("WaterTheCrops", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<WaterTheCrops>("WaterTheCrops", choreConfig);
+                else if (choreConfig.Key.StartsWith("WaterTheSlimes", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<WaterTheSlimes>("WaterTheSlimes", choreConfig);
+            }
+        }
+
+        private void TryAddChore<T>(string choreName, KeyValuePair<string, IDictionary<string, string>> choreConfig) where T : class, ICustomChore
+        {
+            var dialogues = _dialogues
+                .Where(dialogue => choreName.IndexOf(dialogue.Key, StringComparison.CurrentCultureIgnoreCase) >= 0)
+                .ToList();
+            _chores.Add(choreConfig.Key, Activator.CreateInstance(typeof(T), new object[] { choreConfig.Key, choreConfig.Value, dialogues }) as T);
         }
 
         public override object GetApi()
@@ -111,7 +138,11 @@ namespace LeFauxMatt.CustomChores
         /*********
         ** Private methods
         *********/
-        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <summary>
+        /// Raised after the game is launched, right before the first update tick. This happens once per game session
+        /// (unrelated to loading saves). All mods are loaded and initialized at this point, so this is a good time to
+        /// set up mod integrations.
+        /// </summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event data.</param>
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -123,23 +154,6 @@ namespace LeFauxMatt.CustomChores
                 original: AccessTools.Method(typeof(StardewValley.NPC), nameof(StardewValley.NPC.marriageDuties)),
                 prefix: new HarmonyMethod(typeof(NpcPatches), nameof(NpcPatches.MarriageDuties_Prefix))
             );
-
-            // Load default chores
-            TryAddChore<FeedTheAnimals>("FeedTheAnimals");
-            TryAddChore<FeedThePet>("FeedThePet");
-            TryAddChore<GiveAGift>("GiveAGift");
-            TryAddChore<PetTheAnimals>("PetTheAnimals");
-            TryAddChore<RepairTheFences>("RepairTheFences");
-            TryAddChore<WaterTheCrops>("WaterTheCrops");
-            TryAddChore<WaterTheSlimes>("WaterTheSlimes");
-        }
-
-        private void TryAddChore<T>(string name) where T: class, ICustomChore
-        {
-            _config.Chores.TryGetValue(name, out var config);
-            if (config == null)
-                config = new Dictionary<string, string> { };
-            _chores.Add(name, Activator.CreateInstance(typeof(T), new object[] { this, config }) as T);
         }
 
         /// <summary>
@@ -173,21 +187,11 @@ namespace LeFauxMatt.CustomChores
                 return;
 
             // Generate list of chore options for today
-            var choreList = new List<ICustomChore>();
-
-            foreach (var choreConfig in chores)
-            {
-                if (r.NextDouble() >= choreConfig.Chance)
-                    continue;
-
-                _chores.TryGetValue(choreConfig.ChoreName, out var chore);
-                if (chore == null)
-                    continue;
-                if (!chore.CanDoIt())
-                    continue;
-
-                choreList.Add(chore);
-            }
+            var choreList = _chores
+                .Where(chore =>
+                    chores.Any(choreConfig =>
+                        r.NextDouble() >= choreConfig.Chance && choreConfig.ChoreName.Equals(chore.Key)) && chore.Value.CanDoIt())
+                .ToList();
 
             // Attempt to perform chores from options
             var choresDone = _config.DailyLimit;
@@ -195,29 +199,22 @@ namespace LeFauxMatt.CustomChores
 
             foreach (var chore in choreList)
             {
-                bool didIt;
-
-                Monitor.Log($"Attempting to perform chore {chore.ChoreName}:\n", LogLevel.Trace);
-
+                Monitor.Log($"Attempting to perform chore {chore.Key}:\n", LogLevel.Trace);
                 try
                 {
-                    didIt = chore.DoIt();
+                    if (chore.Value.DoIt())
+                    {
+                        var dialogueText = chore.Value.GetDialogue(spouse);
+                        if (!string.IsNullOrWhiteSpace(dialogueText))
+                            spouse.setNewDialogue(dialogueText, true);
+                        if (--choresDone <= 0)
+                            break;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Monitor.Log($"Failed to perform chore {chore.ChoreName}:\n{ex}", LogLevel.Error);
-                    didIt = false;
+                    Monitor.Log($"Failed to perform chore {chore.Key}:\n{ex}", LogLevel.Error);
                 }
-
-                if (!didIt)
-                    continue;
-
-                var dialogueText = chore.GetDialogue(spouse);
-                if (!string.IsNullOrWhiteSpace(dialogueText))
-                    spouse.setNewDialogue(dialogueText, true);
-
-                if (--choresDone <= 0)
-                    break;
             }
         }
 
