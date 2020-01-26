@@ -70,18 +70,6 @@ namespace LeFauxMatt.CustomChores
             }
         }
 
-        private void TryAddChore<T>(string choreName, KeyValuePair<string, IDictionary<string, string>> choreConfig)
-            where T : class, ICustomChore
-        {
-            var dialogues =
-                from dialogue in _dialogues
-                where dialogue.Key.IndexOf(choreName,
-                          StringComparison.CurrentCultureIgnoreCase) >= 0
-                select dialogue;
-            _chores.Add(choreConfig.Key,
-                Activator.CreateInstance(typeof(T), new object[] {choreConfig.Key, choreConfig.Value, dialogues}) as T);
-        }
-
         public override object GetApi()
         {
             return new CustomChoresApi(Monitor, _chores);
@@ -125,6 +113,18 @@ namespace LeFauxMatt.CustomChores
                 else if (choreConfig.Key.StartsWith("WaterTheSlimes", StringComparison.CurrentCultureIgnoreCase))
                     TryAddChore<WaterTheSlimes>("WaterTheSlimes", choreConfig);
             }
+        }
+
+        private void TryAddChore<T>(string choreName, KeyValuePair<string, IDictionary<string, string>> choreConfig)
+            where T : class, ICustomChore
+        {
+            var dialogues =
+                from dialogue in _dialogues
+                where dialogue.Key.IndexOf(choreName,
+                          StringComparison.CurrentCultureIgnoreCase) >= 0
+                select dialogue;
+            _chores.Add(choreConfig.Key,
+                Activator.CreateInstance(typeof(T), new object[] { choreConfig.Key, choreConfig.Value, dialogues }) as T);
         }
 
         /// <summary>
