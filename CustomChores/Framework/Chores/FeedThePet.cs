@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
+using StardewModdingAPI;
 using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class FeedThePet: BaseCustomChore
     {
-        public override string ChoreName { get; } = "FeedThePet";
-        public FeedThePet(CustomChores instance, IDictionary<string, string> config)
-            : base(instance, config) { }
+        public FeedThePet(string choreName, IDictionary<string, string> config, IList<Translation> dialogue)
+            : base(choreName, config, dialogue) { }
 
         public override bool CanDoIt(string name = null)
         {

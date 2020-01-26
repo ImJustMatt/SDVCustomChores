@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using StardewModdingAPI;
 using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class WaterTheSlimes : BaseCustomChore
     {
-        public override string ChoreName { get; } = "WaterTheSlimes";
-        public WaterTheSlimes(CustomChores instance, IDictionary<string, string> config)
-            : base(instance, config) { }
+        public WaterTheSlimes(string choreName, IDictionary<string, string> config, IList<Translation> dialogue)
+            : base(choreName, config, dialogue) { }
 
         public override bool CanDoIt(string name = null)
         {

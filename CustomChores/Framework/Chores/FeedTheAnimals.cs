@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 
@@ -8,13 +9,11 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class FeedTheAnimals : BaseCustomChore
     {
-        public override string ChoreName { get; } = "FeedTheAnimals";
-
         private IEnumerable<AnimalHouse> _animalHouses;
         private readonly bool _enableBarns;
         private readonly bool _enableCoops;
 
-        public FeedTheAnimals(CustomChores instance, IDictionary<string, string> config) : base(instance, config)
+        public FeedTheAnimals(string choreName, IDictionary<string, string> config, IList<Translation> dialogue) : base(choreName, config, dialogue)
         {
             Config.TryGetValue("EnableBarns", out var enableBarns);
             Config.TryGetValue("EnableCoops", out var enableCoops);

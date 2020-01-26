@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
@@ -9,14 +10,12 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class WaterTheCrops : BaseCustomChore
     {
-        public override string ChoreName { get; } = "WaterTheCrops";
-
         private IEnumerable<HoeDirt> _hoeDirt;
         private readonly bool _enableFarm;
         private readonly bool _enableBuildings;
         private readonly bool _enableGreenhouse;
 
-        public WaterTheCrops(CustomChores instance, IDictionary<string, string> config) : base(instance, config)
+        public WaterTheCrops(string choreName, IDictionary<string, string> config, IList<Translation> dialogue) : base(choreName, config, dialogue)
         {
             Config.TryGetValue("EnableFarm", out var enableFarm);
             Config.TryGetValue("EnableBuildings", out var enableBuildings);

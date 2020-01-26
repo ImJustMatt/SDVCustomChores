@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using SObject = StardewValley.Object;
@@ -9,14 +10,12 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class RepairTheFences : BaseCustomChore
     {
-        public override string ChoreName { get; } = "RepairTheFences";
-
         private IEnumerable<Fence> _fences;
         private readonly bool _enableFarm;
         private readonly bool _enableBuildings;
         private readonly bool _enableOutdoors;
 
-        public RepairTheFences(CustomChores instance, IDictionary<string, string> config) : base(instance, config)
+        public RepairTheFences(string choreName, IDictionary<string, string> config, IList<Translation> dialogue) : base(choreName, config, dialogue)
         {
             Config.TryGetValue("EnableFarm", out var enableFarm);
             Config.TryGetValue("EnableBuildings", out var enableBuildings);
