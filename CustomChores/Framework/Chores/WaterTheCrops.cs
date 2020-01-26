@@ -30,9 +30,12 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         {
             if (Game1.isRaining || Game1.currentSeason.Equals("winter"))
                 return false;
-            
-            var locations = Game1.locations
-                .Where(location => (_enableFarm && location.IsFarm) || (_enableGreenhouse && location.IsGreenhouse));
+
+            var locations =
+                from location in Game1.locations
+                where (_enableFarm && location.IsFarm) ||
+                      (_enableGreenhouse && location.IsGreenhouse)
+                select location;
             
             if (_enableBuildings)
                 locations = locations.Concat(

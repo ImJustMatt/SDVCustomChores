@@ -23,10 +23,12 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool CanDoIt(string name = null)
         {
-            _farmAnimals = Game1.getFarm().getAllFarmAnimals()
-                .Where(farmAnimal => !farmAnimal.wasPet.Value &&
-                                     ((_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn")) ||
-                                         (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop"))));
+            _farmAnimals =
+                from farmAnimal in Game1.getFarm().getAllFarmAnimals()
+                where !farmAnimal.wasPet.Value &&
+                      ((_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn")) || 
+                       (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop")))
+                select farmAnimal;
             return _farmAnimals.Any();
         }
 

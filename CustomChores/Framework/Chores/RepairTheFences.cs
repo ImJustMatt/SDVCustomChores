@@ -28,9 +28,12 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool CanDoIt(string name = null)
         {
-            var locations = Game1.locations
-                .Where(location => (_enableFarm && location.IsFarm) || (_enableOutdoors && location.IsOutdoors));
-            
+            var locations =
+                from location in Game1.locations
+                where (_enableFarm && location.IsFarm) ||
+                      (_enableOutdoors && location.IsOutdoors)
+                select location;
+
             if (_enableBuildings)
                 locations = locations.Concat(
                     from location in Game1.locations.OfType<BuildableGameLocation>()
@@ -38,8 +41,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                     where building.indoors.Value != null
                     select building.indoors.Value);
             
-            _fences = locations
-                .SelectMany(location => location.objects.Values).OfType<Fence>();
+            _fences = locations.SelectMany(location => location.objects.Values).OfType<Fence>();
             
             return _fences.Any();
         }

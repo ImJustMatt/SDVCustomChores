@@ -24,12 +24,13 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool CanDoIt(string name = null)
         {
-            _animalHouses = Game1.getFarm().buildings
-                .Where(building => building.daysOfConstructionLeft.Value <= 0)
-                .Where(building => (_enableBarns && building is Barn) || (_enableCoops && building is Coop))
-                .Select(building => building.indoors.Value)
+            _animalHouses = (
+                    from building in Game1.getFarm().buildings
+                    where building.daysOfConstructionLeft <= 0 &&
+                          ((_enableBarns && building is Barn) ||
+                           (_enableCoops && building is Coop))
+                    select building.indoors.Value)
                 .OfType<AnimalHouse>();
-            
             return _animalHouses.Any();
         }
 
