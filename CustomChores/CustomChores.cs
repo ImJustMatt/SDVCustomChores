@@ -161,7 +161,7 @@ namespace LeFauxMatt.CustomChores
                 where spouseConfig.Any(choreConfig =>
                           r.NextDouble() >= choreConfig.Chance &&
                           choreConfig.ChoreName.Equals(chore.Key)) &&
-                      chore.Value.CanDoIt()
+                      chore.Value.CanDoIt(spouse)
                 select chore;
 
             // Attempt to perform chores from options
@@ -171,7 +171,7 @@ namespace LeFauxMatt.CustomChores
                 Monitor.Log($"Attempting to perform chore {chore.Key}:\n", LogLevel.Trace);
                 try
                 {
-                    if (chore.Value.DoIt())
+                    if (chore.Value.DoIt(spouse))
                     {
                         var dialogueText = chore.Value.GetDialogue(spouse);
                         if (!string.IsNullOrWhiteSpace(dialogueText))
@@ -203,13 +203,14 @@ namespace LeFauxMatt.CustomChores
         /// <param name="args">The arguments received by the command. Each word after the command name is a separate argument.</param>
         private void DoChore(string command, string[] args)
         {
+            var spouse = Game1.player.getSpouse();
             this._chores.TryGetValue(args[0], out var chore);
 
             if (chore != null)
             {
                 this.Monitor.Log($"Attempting to perform chore {args[0]}.", LogLevel.Info);
-                if (chore.CanDoIt())
-                    chore.DoIt();
+                if (chore.CanDoIt(spouse))
+                    chore.DoIt(spouse);
             }
             else
             {
@@ -222,10 +223,11 @@ namespace LeFauxMatt.CustomChores
         /// <param name="args">The arguments received by the command. Each word after the command name is a separate argument.</param>
         private void CanDoChore(string command, string[] args)
         {
+            var spouse = Game1.player.getSpouse();
             this._chores.TryGetValue(args[0], out var chore);
 
             if (chore != null)
-                this.Monitor.Log((chore.CanDoIt() ? "Can" : "Cannot") + $" do custom chore {args[0]}.",
+                this.Monitor.Log((chore.CanDoIt(spouse) ? "Can" : "Cannot") + $" do custom chore {args[0]}.",
                     LogLevel.Info);
             else
                 this.Monitor.Log($"No chore found with name {args[0]}", LogLevel.Info);

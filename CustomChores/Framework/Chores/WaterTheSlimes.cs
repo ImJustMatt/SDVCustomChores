@@ -13,7 +13,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         public WaterTheSlimes(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue)
             : base(choreName, config, dialogue) { }
 
-        public override bool CanDoIt(string name = null)
+        public override bool CanDoIt(NPC spouse)
         {
             _slimeHutches =  (
                 from building in Game1.getFarm().buildings
@@ -24,7 +24,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return _slimeHutches.Any();
         }
 
-        public override bool DoIt(string name = null)
+        public override bool DoIt(NPC spouse)
         {
             foreach (var slimeHutch in _slimeHutches)
             {

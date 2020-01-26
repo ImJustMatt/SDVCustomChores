@@ -26,7 +26,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _enableGreenhouse = string.IsNullOrWhiteSpace(enableGreenhouse) || Convert.ToBoolean(enableGreenhouse);
         }
 
-        public override bool CanDoIt(string name = null)
+        public override bool CanDoIt(NPC spouse)
         {
             if (Game1.isRaining || Game1.currentSeason.Equals("winter"))
                 return false;
@@ -51,7 +51,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return _hoeDirt.Any();
         }
 
-        public override bool DoIt(string name = null)
+        public override bool DoIt(NPC spouse)
         {
             foreach (var hoeDirt in _hoeDirt)
             {

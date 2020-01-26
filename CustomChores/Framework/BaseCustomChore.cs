@@ -19,8 +19,8 @@ namespace LeFauxMatt.CustomChores.Framework
             Dialogues = dialogue;
         }
 
-        public abstract bool CanDoIt(string name = null);
-        public abstract bool DoIt(string name = null);
+        public abstract bool CanDoIt(NPC spouse);
+        public abstract bool DoIt(NPC spouse);
 
         public virtual string GetDialogue(NPC spouse)
         {

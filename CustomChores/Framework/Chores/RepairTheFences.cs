@@ -25,7 +25,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _enableOutdoors = string.IsNullOrWhiteSpace(enableOutdoors) || Convert.ToBoolean(enableOutdoors);
         }
 
-        public override bool CanDoIt(string name = null)
+        public override bool CanDoIt(NPC spouse)
         {
             var locations =
                 from location in Game1.locations
@@ -45,7 +45,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return _fences.Any();
         }
 
-        public override bool DoIt(string name = null)
+        public override bool DoIt(NPC spouse)
         {
             foreach (var fence in _fences)
             {

@@ -22,7 +22,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _enableCoops = string.IsNullOrWhiteSpace(enableCoops) || Convert.ToBoolean(enableCoops);
         }
 
-        public override bool CanDoIt(string name = null)
+        public override bool CanDoIt(NPC spouse)
         {
             _animalHouses = (
                     from building in Game1.getFarm().buildings
@@ -34,7 +34,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return _animalHouses.Any();
         }
 
-        public override bool DoIt(string name = null)
+        public override bool DoIt(NPC spouse)
         {
             foreach (var animalHouse in _animalHouses)
             {
