@@ -60,7 +60,7 @@ namespace LeFauxMatt.CustomChores
                     var chores = spouse.Value
                         .Split('\\')
                         .Select((t) => t.Split(' '))
-                        .Select((t) => new CustomChoreConfig(t[0], Convert.ToDouble(t[1])));
+                        .Select((p) => new CustomChoreConfig(p[0], Convert.ToDouble(p[1])));
                     _spouses.Add(spouse.Key, chores);
                 }
                 catch (Exception ex)
@@ -93,7 +93,7 @@ namespace LeFauxMatt.CustomChores
         {
             var dialogues =
                 from dialogue in _dialogues
-                where choreName.IndexOf(dialogue.Key,
+                where dialogue.Key.IndexOf(choreName,
                           StringComparison.CurrentCultureIgnoreCase) >= 0
                 select dialogue;
             _chores.Add(choreConfig.Key, Activator.CreateInstance(typeof(T), new object[] { choreConfig.Key, choreConfig.Value, dialogues }) as T);
@@ -155,25 +155,33 @@ namespace LeFauxMatt.CustomChores
             if (spouseHearts < _config.HeartsNeeded && _config.HeartsNeeded > 0)
                 return;
 
+            // List of spouse chores based on random chance
+            var spouseChores =
+                from choreConfig in spouseConfig
+                where r.NextDouble() < choreConfig.Chance
+                select choreConfig.ChoreName;
+
             // Generate list of chore options for today
-            var choreList =
+            var choreList = (
                 from chore in _chores
-                where spouseConfig.Any(choreConfig =>
-                          r.NextDouble() >= choreConfig.Chance &&
-                          choreConfig.ChoreName.Equals(chore.Key)) &&
+                where spouseChores.Contains(chore.Key) &&
                       chore.Value.CanDoIt(spouse)
-                select chore;
+                select chore.Key).Shuffle();
 
             // Attempt to perform chores from options
             var choresDone = _config.DailyLimit;
-            foreach (var chore in choreList.Shuffle().Take(_config.DailyLimit))
+            foreach (var choreName in choreList)
             {
-                Monitor.Log($"Attempting to perform chore {chore.Key}:\n", LogLevel.Trace);
+                _chores.TryGetValue(choreName, out var chore);
+                if (chore == null)
+                    continue;
+
+                Monitor.Log($"Attempting to perform chore {choreName}", LogLevel.Trace);
                 try
                 {
-                    if (chore.Value.DoIt(spouse))
+                    if (chore.DoIt(spouse))
                     {
-                        string dialogueText = chore.Value.GetDialogue(spouse);
+                        var dialogueText = chore.GetDialogue(spouse).ToString();
                         if (!string.IsNullOrWhiteSpace(dialogueText))
                             spouse.setNewDialogue(dialogueText, true);
                         if (--choresDone <= 0)
@@ -182,7 +190,7 @@ namespace LeFauxMatt.CustomChores
                 }
                 catch (Exception ex)
                 {
-                    Monitor.Log($"Failed to perform chore {chore.Key}:\n{ex}", LogLevel.Error);
+                    Monitor.Log($"Failed to perform chore {choreName}:\n{ex}", LogLevel.Error);
                 }
             }
         }
@@ -258,7 +266,6 @@ namespace LeFauxMatt.CustomChores
             {
                 var j = rng.Next(i, buffer.Count);
                 yield return buffer[j];
-
                 buffer[j] = buffer[i];
             }
         }
