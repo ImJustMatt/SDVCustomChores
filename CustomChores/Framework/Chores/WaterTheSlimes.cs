@@ -1,37 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
+using StardewModdingAPI;
 using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class WaterTheSlimes : BaseCustomChore
     {
-        public override string ChoreName { get; } = "WaterTheSlimes";
-        public WaterTheSlimes(CustomChores instance, IDictionary<string, string> config)
-            : base(instance, config) { }
+        private IEnumerable<SlimeHutch> _slimeHutches;
+        public WaterTheSlimes(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue)
+            : base(choreName, config, dialogue) { }
 
-        public override bool CanDoIt(string name = null)
+        public override bool CanDoIt(NPC spouse)
         {
-            return Game1.getFarm().buildings
-                .Where(building => building.daysOfConstructionLeft.Value <= 0)
-                .Any(building => building.indoors.Value is SlimeHutch);
+            _slimeHutches =  (
+                from building in Game1.getFarm().buildings
+                where building.daysOfConstructionLeft.Value <= 0
+                      && building.indoors.Value is SlimeHutch
+                select building.indoors.Value as SlimeHutch);
+
+            return _slimeHutches.Any();
         }
 
-        public override bool DoIt(string name = null)
+        public override bool DoIt(NPC spouse)
         {
-            var success = false;
-
-            foreach (var building in Game1.getFarm().buildings.Where(building => building.daysOfConstructionLeft.Value <= 0))
+            foreach (var slimeHutch in _slimeHutches)
             {
-                if (!(building.indoors.Value is SlimeHutch slimeHutch))
-                    continue;
                 for (var index = 0; index < slimeHutch.waterSpots.Count; ++index)
                     slimeHutch.waterSpots[index] = true;
-                success = true;
             }
 
-            return success;
+            return true;
         }
     }
 }

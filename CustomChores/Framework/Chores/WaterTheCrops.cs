@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
@@ -9,31 +10,32 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class WaterTheCrops : BaseCustomChore
     {
-        public override string ChoreName { get; } = "WaterTheCrops";
-
         private IEnumerable<HoeDirt> _hoeDirt;
         private readonly bool _enableFarm;
         private readonly bool _enableBuildings;
         private readonly bool _enableGreenhouse;
 
-        public WaterTheCrops(CustomChores instance, IDictionary<string, string> config) : base(instance, config)
+        public WaterTheCrops(string choreName, IDictionary<string, string> config, IEnumerable<Translation> dialogue) : base(choreName, config, dialogue)
         {
             Config.TryGetValue("EnableFarm", out var enableFarm);
             Config.TryGetValue("EnableBuildings", out var enableBuildings);
             Config.TryGetValue("EnableGreenhouse", out var enableGreenhouse);
 
-            _enableFarm = (enableFarm == null) || Convert.ToBoolean(enableFarm);
-            _enableBuildings = (enableBuildings == null) || Convert.ToBoolean(enableBuildings);
-            _enableGreenhouse = (enableGreenhouse == null) || Convert.ToBoolean(enableGreenhouse);
+            _enableFarm = string.IsNullOrWhiteSpace(enableFarm) || Convert.ToBoolean(enableFarm);
+            _enableBuildings = string.IsNullOrWhiteSpace(enableBuildings) || Convert.ToBoolean(enableBuildings);
+            _enableGreenhouse = string.IsNullOrWhiteSpace(enableGreenhouse) || Convert.ToBoolean(enableGreenhouse);
         }
 
-        public override bool CanDoIt(string name = null)
+        public override bool CanDoIt(NPC spouse)
         {
             if (Game1.isRaining || Game1.currentSeason.Equals("winter"))
                 return false;
-            
-            var locations = Game1.locations
-                .Where(location => (_enableFarm && location.IsFarm) || (_enableGreenhouse && location.IsGreenhouse));
+
+            var locations =
+                from location in Game1.locations
+                where (_enableFarm && location.IsFarm) ||
+                      (_enableGreenhouse && location.IsGreenhouse)
+                select location;
             
             if (_enableBuildings)
                 locations = locations.Concat(
@@ -49,13 +51,13 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return _hoeDirt.Any();
         }
 
-        public override bool DoIt(string name = null)
+        public override bool DoIt(NPC spouse)
         {
             foreach (var hoeDirt in _hoeDirt)
             {
                 hoeDirt.state.Value = HoeDirt.watered;
             }
-
+            
             return true;
         }
     }

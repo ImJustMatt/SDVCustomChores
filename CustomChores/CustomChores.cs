@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Harmony;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -28,7 +29,7 @@ namespace LeFauxMatt.CustomChores
         private IEnumerable<Translation> _dialogues;
 
         /// <summary>The spouses that will be able to perform chores.</summary>
-        private readonly IDictionary<string, IList<CustomChoreConfig>> _spouses = new Dictionary<string, IList<CustomChoreConfig>>();
+        private readonly IDictionary<string, IEnumerable<CustomChoreConfig>> _spouses = new Dictionary<string, IEnumerable<CustomChoreConfig>>();
 
         /*********
         ** Public methods
@@ -52,9 +53,6 @@ namespace LeFauxMatt.CustomChores
 
             _dialogues = helper.Translation.GetTranslations();
 
-            if (!helper.Translation.GetTranslations().Any())
-                _config.EnableDialogue = false;
-
             foreach (var spouse in _config.Spouses)
             {
                 try
@@ -62,8 +60,7 @@ namespace LeFauxMatt.CustomChores
                     var chores = spouse.Value
                         .Split('\\')
                         .Select((t) => t.Split(' '))
-                        .Select((t) => new CustomChoreConfig(t[0], Convert.ToDouble(t[1])))
-                        .ToList();
+                        .Select((p) => new CustomChoreConfig(p[0], Convert.ToDouble(p[1])));
                     _spouses.Add(spouse.Key, chores);
                 }
                 catch (Exception ex)
@@ -73,41 +70,31 @@ namespace LeFauxMatt.CustomChores
             }
         }
 
+        private void TryAddChore<T>(string choreName, KeyValuePair<string, IDictionary<string, string>> choreConfig)
+            where T : class, ICustomChore
+        {
+            var dialogues =
+                from dialogue in _dialogues
+                where dialogue.Key.IndexOf(choreName,
+                          StringComparison.CurrentCultureIgnoreCase) >= 0
+                select dialogue;
+            _chores.Add(choreConfig.Key,
+                Activator.CreateInstance(typeof(T), new object[] {choreConfig.Key, choreConfig.Value, dialogues}) as T);
+        }
+
         public override object GetApi()
         {
             return new CustomChoresApi(Monitor, _chores);
         }
 
-        internal Translation GetDialogue(string name, string chore)
-        {
-            // Try to get individual dialogue
-            var dialogues =
-                _dialogues.Where(dialogue => dialogue.Key.StartsWith($"{name}.{chore}", StringComparison.CurrentCultureIgnoreCase)).ToList();
-
-            // Try to get global dialogue
-            if (dialogues.Count == 0)
-                dialogues = _dialogues.Where(dialogue => dialogue.Key.StartsWith($"default.{chore}", StringComparison.CurrentCultureIgnoreCase)).ToList();
-
-            // Return null string
-            if (dialogues.Count == 0)
-                return (Translation) null;
-
-            // Return random dialogue of all that meet criteria
-            var rnd = new Random();
-            var index = rnd.Next(dialogues.Count);
-
-            return dialogues[index].Tokens(new
-            {
-                playerName = Game1.player.Name,
-                nickName = Game1.player.getSpouse().getTermOfSpousalEndearment(),
-                petName = Game1.player.getPetName()
-            });
-        }
-
         /*********
         ** Private methods
         *********/
-        /// <summary>Raised after the game is launched, right before the first update tick. This happens once per game session (unrelated to loading saves). All mods are loaded and initialised at this point, so this is a good time to set up mod integrations.</summary>
+        /// <summary>
+        /// Raised after the game is launched, right before the first update tick. This happens once per game session
+        /// (unrelated to loading saves). All mods are loaded and initialized at this point, so this is a good time to
+        /// set up mod integrations.
+        /// </summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event data.</param>
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -121,21 +108,23 @@ namespace LeFauxMatt.CustomChores
             );
 
             // Load default chores
-            TryAddChore<FeedTheAnimals>("FeedTheAnimals");
-            TryAddChore<FeedThePet>("FeedThePet");
-            TryAddChore<GiveAGift>("GiveAGift");
-            TryAddChore<PetTheAnimals>("PetTheAnimals");
-            TryAddChore<RepairTheFences>("RepairTheFences");
-            TryAddChore<WaterTheCrops>("WaterTheCrops");
-            TryAddChore<WaterTheSlimes>("WaterTheSlimes");
-        }
-
-        private void TryAddChore<T>(string name) where T: class, ICustomChore
-        {
-            _config.Chores.TryGetValue(name, out var config);
-            if (config == null)
-                config = new Dictionary<string, string> { };
-            _chores.Add(name, Activator.CreateInstance(typeof(T), new object[] { this, config }) as T);
+            foreach (var choreConfig in _config.Chores)
+            {
+                if (choreConfig.Key.StartsWith("FeedTheAnimals", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<FeedTheAnimals>("FeedTheAnimals", choreConfig);
+                else if (choreConfig.Key.StartsWith("FeedThePet", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<FeedThePet>("FeedThePet", choreConfig);
+                else if (choreConfig.Key.StartsWith("GiveAGift", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<GiveAGift>("GiveAGift", choreConfig);
+                else if (choreConfig.Key.StartsWith("PetTheAnimals", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<PetTheAnimals>("PetTheAnimals", choreConfig);
+                else if (choreConfig.Key.StartsWith("RepairTheFences", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<RepairTheFences>("RepairTheFences", choreConfig);
+                else if (choreConfig.Key.StartsWith("WaterTheCrops", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<WaterTheCrops>("WaterTheCrops", choreConfig);
+                else if (choreConfig.Key.StartsWith("WaterTheSlimes", StringComparison.CurrentCultureIgnoreCase))
+                    TryAddChore<WaterTheSlimes>("WaterTheSlimes", choreConfig);
+            }
         }
 
         /// <summary>
@@ -158,8 +147,8 @@ namespace LeFauxMatt.CustomChores
                 return;
 
             // Get spouse chores
-            _spouses.TryGetValue(spouse.Name, out var chores);
-            if (chores == null)
+            _spouses.TryGetValue(spouse.Name, out var spouseConfig);
+            if (spouseConfig == null || !spouseConfig.Any())
                 return;
 
             // Get spouse hearts
@@ -168,45 +157,43 @@ namespace LeFauxMatt.CustomChores
             if (spouseHearts < _config.HeartsNeeded && _config.HeartsNeeded > 0)
                 return;
 
+            // List of spouse chores based on random chance
+            var spouseChores =
+                from choreConfig in spouseConfig
+                where r.NextDouble() < choreConfig.Chance
+                select choreConfig.ChoreName;
+
+            // Generate list of chore options for today
+            var choreList = (
+                from chore in _chores
+                where spouseChores.Contains(chore.Key) &&
+                      chore.Value.CanDoIt(spouse)
+                select chore.Key).Shuffle();
+
+            // Attempt to perform chores from options
             var choresDone = _config.DailyLimit;
-            var npcDialogue = new List<string>();
-
-            foreach (var choreConfig in chores)
+            foreach (var choreName in choreList)
             {
-                if (r.NextDouble() >= choreConfig.Chance)
-                    continue;
-
-                _chores.TryGetValue(choreConfig.ChoreName, out var chore);
+                _chores.TryGetValue(choreName, out var chore);
                 if (chore == null)
                     continue;
-                if (!chore.CanDoIt())
-                    continue;
 
-                Monitor.Log($"Attempting to perform chore {choreConfig.ChoreName}:\n", LogLevel.Trace);
-
-                bool didIt;
+                Monitor.Log($"Attempting to perform chore {choreName}", LogLevel.Trace);
                 try
                 {
-                    didIt = chore.DoIt();
+                    if (chore.DoIt(spouse))
+                    {
+                        var dialogueText = chore.GetDialogue(spouse).ToString();
+                        if (!string.IsNullOrWhiteSpace(dialogueText))
+                            spouse.setNewDialogue(dialogueText, true);
+                        if (--choresDone <= 0)
+                            break;
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Monitor.Log($"Failed to perform chore {choreConfig.ChoreName}:\n{ex}", LogLevel.Error);
-                    didIt = false;
+                    Monitor.Log($"Failed to perform chore {choreName}:\n{ex}", LogLevel.Error);
                 }
-
-                if (!didIt)
-                    continue;
-
-                if (_config.EnableDialogue)
-                {
-                    var dialogueText = chore.GetDialogue(spouse.Name);
-                    if (!string.IsNullOrWhiteSpace(dialogueText))
-                        spouse.setNewDialogue(dialogueText, true);
-                }
-
-                if (--choresDone <= 0)
-                    break;
             }
         }
 
@@ -226,13 +213,14 @@ namespace LeFauxMatt.CustomChores
         /// <param name="args">The arguments received by the command. Each word after the command name is a separate argument.</param>
         private void DoChore(string command, string[] args)
         {
+            var spouse = Game1.player.getSpouse();
             this._chores.TryGetValue(args[0], out var chore);
 
             if (chore != null)
             {
                 this.Monitor.Log($"Attempting to perform chore {args[0]}.", LogLevel.Info);
-                if (chore.CanDoIt())
-                    chore.DoIt();
+                if (chore.CanDoIt(spouse))
+                    chore.DoIt(spouse);
             }
             else
             {
@@ -245,13 +233,43 @@ namespace LeFauxMatt.CustomChores
         /// <param name="args">The arguments received by the command. Each word after the command name is a separate argument.</param>
         private void CanDoChore(string command, string[] args)
         {
+            var spouse = Game1.player.getSpouse();
             this._chores.TryGetValue(args[0], out var chore);
 
             if (chore != null)
-                this.Monitor.Log((chore.CanDoIt() ? "Can" : "Cannot") + $" do custom chore {args[0]}.",
+                this.Monitor.Log((chore.CanDoIt(spouse) ? "Can" : "Cannot") + $" do custom chore {args[0]}.",
                     LogLevel.Info);
             else
                 this.Monitor.Log($"No chore found with name {args[0]}", LogLevel.Info);
+        }
+    }
+
+    internal static class EnumerableExtensions
+    {
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source)
+        {
+            return source.Shuffle(new Random());
+        }
+
+        public static IEnumerable<T> Shuffle<T>(this IEnumerable<T> source, Random rng)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+            if (rng == null)
+                throw new ArgumentNullException(nameof(rng));
+            return source.ShuffleIterator(rng);
+        }
+
+        private static IEnumerable<T> ShuffleIterator<T>(
+            this IEnumerable<T> source, Random rng)
+        {
+            var buffer = source.ToList();
+            for (var i = 0; i < buffer.Count; i++)
+            {
+                var j = rng.Next(i, buffer.Count);
+                yield return buffer[j];
+                buffer[j] = buffer[i];
+            }
         }
     }
 }
