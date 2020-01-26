@@ -64,12 +64,12 @@ namespace LeFauxMatt.CustomChores.Framework
             var rnd = new Random();
             var index = rnd.Next(0, dialogues.Count());
 
-            return dialogues.ElementAt(index).Tokens(new
+            return dialogues.Shuffle().First().Tokens(new
             {
                 playerName = Game1.player.Name,
                 nickName = Game1.player.getSpouse().getTermOfSpousalEndearment(),
                 petName = Game1.player.getPetName(),
-                childName = Game1.player.getChildren()[rnd.Next(Game1.player.getChildrenCount())]?.Name
+                childName = Game1.player.getChildrenCount() > 0 ? Game1.player.getChildren().Shuffle().First().Name : ""
             });
         }
     }
