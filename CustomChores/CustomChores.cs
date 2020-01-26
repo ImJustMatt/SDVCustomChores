@@ -102,39 +102,6 @@ namespace LeFauxMatt.CustomChores
             return new CustomChoresApi(Monitor, _chores);
         }
 
-        internal Translation GetDialogue(NPC spouse, string chore)
-        {
-            // Try to get individual dialogue
-            var dialogues =
-                _dialogues.Where(dialogue => dialogue.Key.StartsWith($"{spouse.getName()}.{chore}", StringComparison.CurrentCultureIgnoreCase)).ToList();
-
-            // Try to get gender dialogue
-            if (dialogues.Count == 0)
-            {
-                var gender = spouse.Gender == 1 ? "Female" : "Male";
-                dialogues = _dialogues.Where(dialogue => dialogue.Key.StartsWith($"{gender}.{chore}", StringComparison.CurrentCultureIgnoreCase)).ToList();
-            }
-
-            // Try to get global dialogue
-            if (dialogues.Count == 0)
-                dialogues = _dialogues.Where(dialogue => dialogue.Key.StartsWith($"default.{chore}", StringComparison.CurrentCultureIgnoreCase)).ToList();
-
-            // Return null string
-            if (dialogues.Count == 0)
-                return (Translation) null;
-
-            // Return random dialogue of all that meet criteria
-            var rnd = new Random();
-            var index = rnd.Next(dialogues.Count);
-
-            return dialogues[index].Tokens(new
-            {
-                playerName = Game1.player.Name,
-                nickName = Game1.player.getSpouse().getTermOfSpousalEndearment(),
-                petName = Game1.player.getPetName()
-            });
-        }
-
         /*********
         ** Private methods
         *********/
