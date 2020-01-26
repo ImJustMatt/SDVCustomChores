@@ -17,8 +17,8 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             Config.TryGetValue("EnableBarns", out var enableBarns);
             Config.TryGetValue("EnableCoops", out var enableCoops);
 
-            _enableBarns = (enableBarns == null) || Convert.ToBoolean(enableBarns);
-            _enableCoops = (enableCoops == null) || Convert.ToBoolean(enableCoops);
+            _enableBarns = string.IsNullOrWhiteSpace(enableBarns) || Convert.ToBoolean(enableBarns);
+            _enableCoops = string.IsNullOrWhiteSpace(enableCoops) || Convert.ToBoolean(enableCoops);
         }
 
         public override bool CanDoIt(string name = null)

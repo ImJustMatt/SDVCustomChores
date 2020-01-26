@@ -21,9 +21,9 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             Config.TryGetValue("EnableBuildings", out var enableBuildings);
             Config.TryGetValue("EnableOutdoors", out var enableOutdoors);
 
-            _enableFarm = (enableFarm == null) || Convert.ToBoolean(enableFarm);
-            _enableBuildings = (enableBuildings == null) || Convert.ToBoolean(enableBuildings);
-            _enableOutdoors = (enableOutdoors == null) || Convert.ToBoolean(enableOutdoors);
+            _enableFarm = string.IsNullOrWhiteSpace(enableFarm) || Convert.ToBoolean(enableFarm);
+            _enableBuildings = string.IsNullOrWhiteSpace(enableBuildings) || Convert.ToBoolean(enableBuildings);
+            _enableOutdoors = string.IsNullOrWhiteSpace(enableOutdoors) || Convert.ToBoolean(enableOutdoors);
         }
 
         public override bool CanDoIt(string name = null)
