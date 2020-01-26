@@ -43,7 +43,7 @@ namespace LeFauxMatt.CustomChores.Models
             // Default Chores
             Chores.Add("FeedTheAnimals", new Dictionary<string, string>() {{"EnableBarns", "true"}, {"EnableCoops", "true"}});
             Chores.Add("FeedThePet", new Dictionary<string, string>() { });
-            Chores.Add("GiftAGift.Birthday", new Dictionary<string, string>() {{"Type", "Birthday"}, {"EnableUniversal", "false"}, {"ChanceForLove", "0.1"}});
+            Chores.Add("GiveAGift.Birthday", new Dictionary<string, string>() {{"Type", "Birthday"}, {"EnableUniversal", "false"}, {"ChanceForLove", "0.1"}});
             Chores.Add("PetTheAnimals", new Dictionary<string, string>() {{"EnableBarns", "true"}, {"EnableCoops", "true"}});
             Chores.Add("RepairTheFences", new Dictionary<string, string>() {{"EnableFarm", "true"}, {"EnableBuildings", "true"}, {"EnableOutdoors", "true"}});
             Chores.Add("WaterTheCrops", new Dictionary<string, string>() {{"EnableFarm", "true"}, { "EnableBuildings", "true"}, {"EnableGreenhouse", "true"}});
