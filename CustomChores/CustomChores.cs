@@ -142,7 +142,7 @@ namespace LeFauxMatt.CustomChores
                     continue;
                 }
 
-                Monitor.Log($"Loading chore.json from {contentPack.Manifest.UniqueID}.", LogLevel.Debug);
+                Monitor.Log($"Loading chore.json from {contentPack.Manifest.UniqueID}.", LogLevel.Trace);
                 var choreData = new ChoreData(
                     contentPack.Manifest.UniqueID,
                     contentPack.ReadJsonFile<IDictionary<string, object>>("chore.json"),
