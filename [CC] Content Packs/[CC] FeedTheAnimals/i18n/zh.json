@@ -1,0 +1,4 @@
+﻿{
+	//默认对话（由单个字符覆盖）
+	"HelpfulSpouses.default": "早上好{{nickName}}，我今天喂饱了所有动物。",
+}

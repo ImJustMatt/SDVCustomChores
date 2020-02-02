@@ -1,0 +1,12 @@
+﻿{
+	// Shane dialogue (credit: alekrrau)
+	"HelpfulSpouses[spouseName=Shane]": "Hey, I actually had a burst of productivity today, and I watered all the crops. Fresh air was nice.",
+	// Emily dialogue (credit: alekrrau)
+	"HelpfulSpouses[spouseName=Emily]": "The crops looks so happy this morning when I went to water them. They love the soil here, I can tell.",
+	// Default dialogue (overridden by individual dialogue)
+	"HelpfulSpouses.default": "Good morning {{nickName}}, I watered the crops for you today.",
+
+	// Shop text
+	"HelpForHire.DisplayName":  "Water the Crops",
+	"HelpForHire.Description":  "We'll water all of your crops.",
+}

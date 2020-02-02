@@ -1,0 +1,14 @@
+﻿{
+	// Shane dialogue (credit: alekrrau)
+	"HelpfulSpouses[spouseName=Shane][hasChild=Yes]": "I took {{childName}} around the farm today to pet all the animals with me. It was so cute, I should've taken pictures.",
+	"HelpfulSpouses.1[spouseName=Shane]": "Morning {{nickName}}. I got up early and I've visited all the chickens, and the other animals too. Gave 'em all plenty of attention. Can't believe that's even a chore we have to do, it's one of the best parts of my day! Besides you, of course.",
+	"HelpfulSpouses.2[spouseName=Shane]": "Today's just one of my heavier days... So I went around and visited all the animals. Yeah, I'm feeling a bit better, petting them always cheers me up.",
+	// Emily dialogue (credit: alekrrau)
+	"HelpfulSpouses[spouseName=Emily]": "I pet all the animals this morning- they have such pure souls. I think a lot of humans forget how much they can learn from animals, don't you? I can see wisdom in their eyes that I may never understand.",
+	// Default dialogue (overridden by individual dialogue)
+	"HelpfulSpouses.default": "Good morning {{nickName}}, I pet all of the animals in the barn and coop.",
+
+	// Shop text
+	"HelpForHire.DisplayName":  "Pet the Animals",
+	"HelpForHire.Description":  "We'll brush and care for your Barn and Coop animals.",
+}
