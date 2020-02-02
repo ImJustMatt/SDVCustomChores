@@ -77,9 +77,9 @@ namespace LeFauxMatt.HelpfulSpouses.Models
 
             Spouses.Add("Haley", new Dictionary<string, double>()
             {
-                { "furyx639.BirthdayGift", 0.5 },
-                { "furyx639.MakeBreakfast", 0.4 },
-                { "furyx639.PetTheAnimals", 0.5 },
+                { "furyx639.BirthdayGift", 1.0 },
+                { "furyx639.MakeBreakfast", 0.5 },
+                { "furyx639.PetTheAnimals", 0.6 },
             });
 
             Spouses.Add("Leah", new Dictionary<string, double>()
