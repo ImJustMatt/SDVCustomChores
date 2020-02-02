@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using StardewModdingAPI;
 
 namespace LeFauxMatt.HelpForHire.Models
 {
@@ -6,6 +7,9 @@ namespace LeFauxMatt.HelpForHire.Models
     {
         /// <summary>The chores that will be available for purchase.</summary>
         public IDictionary<string, int> Chores { get; set; } = new Dictionary<string, int>();
+
+        /// <summary>The button used to activate the shop menu.</summary>
+        public SButton ShopMenuButton { get; set; } = SButton.P;
 
         public ModConfig()
         {

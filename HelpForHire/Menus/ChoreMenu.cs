@@ -145,6 +145,15 @@ namespace LeFauxMatt.HelpForHire.Menus
                 Game1.player.Money >= CurrentChore.Price ? Game1.textColor : Color.Red,
                 1f, -1f, -1, -1, 0.25f, 3);
 
+            // Purchased Status
+            Utility.drawTextWithShadow(b,
+                CurrentChore.IsPurchased ? HelpForHire.PurchasedLabel : HelpForHire.NotPurchasedLabel,
+                Game1.dialogueFont,
+                new Vector2(xPositionOnScreen + MaxWidthOfImage + MaxWidthOfDescription / 2 + spaceToClearSideBorder * 3,
+                    yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 16),
+                CurrentChore.IsPurchased ? Game1.textColor : Color.Red,
+                1f, -1f, -1, -1, 0.25f, 3);
+
             _backButton.draw(b);
             _forwardButton.draw(b);
             _okButton.draw(b, !CurrentChore.IsPurchased ? Color.White : Color.Gray * 0.8f, 0.88f, 0);

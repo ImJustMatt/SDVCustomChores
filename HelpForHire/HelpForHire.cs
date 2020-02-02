@@ -24,6 +24,10 @@ namespace LeFauxMatt.HelpForHire
         /// <summary>A list of chores with assets and config related to the shop menu.</summary>
         private readonly IDictionary<string, ChoreHandler> _chores = new Dictionary<string, ChoreHandler>();
 
+        internal static string PurchasedLabel;
+        internal static string NotPurchasedLabel;
+        internal static string InsufficientFundsLabel;
+
         /*********
         ** Public methods
         *********/
@@ -32,7 +36,10 @@ namespace LeFauxMatt.HelpForHire
         public override void Entry(IModHelper helper)
         {
             // init 
-            _config = Helper.ReadConfig<ModConfig>();
+            _config = helper.ReadConfig<ModConfig>();
+            PurchasedLabel = helper.Translation.Get("label.purchased");
+            NotPurchasedLabel = helper.Translation.Get("label.notPurchased");
+            InsufficientFundsLabel = helper.Translation.Get("label.insufficientFunds");
 
             // add console commands
             helper.ConsoleCommands.Add("chores_OpenShop", "Opens the chores shop.\n\nUsage: chores_OpenShop", OpenShop);
@@ -41,6 +48,7 @@ namespace LeFauxMatt.HelpForHire
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
+            helper.Events.Input.ButtonPressed += OnButtonPressed;
         }
 
         /*********
@@ -93,6 +101,7 @@ namespace LeFauxMatt.HelpForHire
         /// <param name="e">The event data.</param>
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
+            bool insufficientFunds = false;
             foreach (var choreHandler in _chores)
             {
                 var chore = choreHandler.Value;
@@ -102,9 +111,8 @@ namespace LeFauxMatt.HelpForHire
 
                 if (Game1.player.Money < chore.Price)
                 {
-                    // Insufficient Funds
-                    Game1.dayTimeMoneyBox.moneyShakeTimer = 1000;
-                    continue;
+                    insufficientFunds = true;
+                    break;
                 }
 
                 try
@@ -121,6 +129,31 @@ namespace LeFauxMatt.HelpForHire
                     Monitor.Log($"Failed to perform chore {choreHandler.Key}:\n{ex}", LogLevel.Error);
                 }
             }
+
+            if (!insufficientFunds)
+                return;
+
+            // Insufficient Funds
+            foreach (var choreHandler in _chores)
+            {
+                choreHandler.Value.IsPurchased = false;
+            }
+
+            Game1.addHUDMessage(new HUDMessage(InsufficientFundsLabel, 3));
+            Game1.dayTimeMoneyBox.moneyShakeTimer = 1000;
+        }
+
+        /// <summary>Raised after the player presses a button on the keyboard, controller, or mouse.</summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
+        {
+            if (!Context.IsPlayerFree || !_chores.Any() || !(Game1.activeClickableMenu is null))
+                return;
+
+            var key = e.Button;
+            if (key == _config.ShopMenuButton)
+                Game1.activeClickableMenu = new ChoreMenu(_customChoresApi, _chores);
         }
     }
 }
