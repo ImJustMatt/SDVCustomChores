@@ -1,0 +1,13 @@
+﻿{
+	"Name": "HelpForHire",
+	"Author": "furyx639",
+	"Version": "0.0.1",
+	"Description": "Adds a shop interface to the game for hiring workers to perform a chore in the morning.",
+	"UniqueID": "furyx639.HelpForHire",
+	"EntryDll": "HelpForHire.dll",
+	"MinimumApiVersion": "2.0",
+	"Dependencies":  [
+		{ "UniqueID":  "furyx639.CustomChores", "IsRequired":  true }
+	],
+	"UpdateKeys": ["Nexus:5316"]
+}
