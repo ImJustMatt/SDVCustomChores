@@ -8,5 +8,6 @@
 	"MinimumApiVersion": "2.0",
 	"Dependencies":  [
 		{ "UniqueID":  "furyx639.CustomChores", "IsRequired":  true }
-	]
+	],
+	"UpdateKeys": ["Nexus:5316"]
 }
