@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using LeFauxMatt.CustomChores.Models;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -19,6 +20,6 @@ namespace LeFauxMatt.CustomChores
         bool DoIt();
 
         /// <summary>Returns tokens for substitution.</summary>
-        IDictionary<string, string> GetTokens();
+        IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper);
     }
 }

@@ -11,30 +11,38 @@ namespace LeFauxMatt.HelpForHire.Models
     internal class ChoreHandler
     {
         private ChoreData Chore { get; }
-        internal Translation DisplayName { get; }
-        internal Translation Description { get; }
+        private readonly ICustomChoresApi _customChoresApi;
+        private readonly TranslationData _displayName;
+        private readonly TranslationData _description;
         internal bool IsPurchased { get; set; }
         internal int Price { get; }
         public string ChoreName => Chore.ChoreName;
+        public string DisplayName => _displayName.Tokens(_customChoresApi.GetChoreTokens(ChoreName));
+        public string Description => _description.Tokens(_customChoresApi.GetChoreTokens(ChoreName));
         public int ImageWidth => Chore.Image.Width;
         public int ImageHeight => Chore.Image.Height;
 
-        internal ChoreHandler(ChoreData chore, int price)
+        internal ChoreHandler(ChoreData chore, int price, ICustomChoresApi customChoresApi)
         {
             Chore = chore;
             Price = price;
+            _customChoresApi = customChoresApi;
 
             // get display name
-            DisplayName = (
+            var tokens = customChoresApi.GetChoreTokens(chore.ChoreName);
+            tokens.Add("Mod", () => "HelpForHire");
+
+            _displayName = (
                 from translation in chore.Translations
-                where translation.Key.Equals("HelpForHire.DisplayName",
-                    StringComparison.CurrentCultureIgnoreCase)
+                where translation.Key.Equals("DisplayName",
+                          StringComparison.CurrentCultureIgnoreCase)
+                      && translation.Filter(tokens)
                 select translation).First();
 
             // get description
-            Description = (
+            _description = (
                 from translation in chore.Translations
-                where translation.Key.Equals("HelpForHire.Description",
+                where translation.Key.Equals("Description",
                     StringComparison.CurrentCultureIgnoreCase)
                 select translation).First();
         }
@@ -45,6 +53,11 @@ namespace LeFauxMatt.HelpForHire.Models
                 new Vector2(x - Chore.Image.Width / 2, y - Chore.Image.Height / 2),
                 new Rectangle(0, 0, Chore.Image.Width, Chore.Image.Height),
                 Color.White);
+        }
+
+        public void ClearTranslationCache()
+        {
+            Chore.ClearTranslationCache();
         }
     }
 }

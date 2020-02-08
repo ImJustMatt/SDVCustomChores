@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
-using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
 
@@ -64,7 +63,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             if (!_giftType.Equals("Birthday", StringComparison.CurrentCultureIgnoreCase))
             { 
                 itemIds.AddRange(
-                    from itemId in _giftType.Split(',')
+                    from itemId in _giftType.Split(' ')
                     select Convert.ToInt32(itemId));
             }
             else
@@ -118,23 +117,44 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                 select objectInfo;
 
             // Get random object from list
-            var index = r.Next(0, objects.Count());
+            var item = objects.Shuffle().First();
 
             // Store item to give to player
-            _itemId = objects.ElementAt(index).Key;
-            _itemName = objects.ElementAt(index).Value.Split('/')[0];
+            _itemId = item.Key;
+            _itemName = item.Value.Split('/')[0];
 
             return true;
         }
 
-        public override IDictionary<string, string> GetTokens()
+        public override IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
         {
-            var tokens = base.GetTokens();
-            tokens.Add("itemName", _itemName);
-            tokens.Add("itemId", _itemId.ToString());
-            tokens.Add("birthdayName", _todayBirthdayNpc?.getName());
-            tokens.Add("birthdayGender", _todayBirthdayNpc?.Gender == 1 ? "Female" : "Male");
+            var tokens = base.GetTokens(contentHelper);
+            tokens.Add("ItemName", GetItemName);
+            tokens.Add("ItemId", GetItemId);
+            tokens.Add("Birthday", GetBirthdayName);
+            tokens.Add("BirthdayGender", GetBirthdayGender);
             return tokens;
+        }
+
+        public string GetItemName()
+        {
+            return _itemName;
+        }
+
+        public string GetItemId()
+        {
+            return _itemId.ToString();
+        }
+
+        public static string GetBirthdayName()
+        {
+            return Utility.getTodaysBirthdayNPC(Game1.currentSeason, Game1.dayOfMonth)?.getName();
+        }
+
+        public static string GetBirthdayGender()
+        {
+            return Utility.getTodaysBirthdayNPC(Game1.currentSeason, Game1.dayOfMonth)?.Gender == 1
+                ? "Female" : "Male";
         }
     }
 }

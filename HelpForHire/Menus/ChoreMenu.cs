@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using LeFauxMatt.CustomChores;
+using LeFauxMatt.CustomChores.Models;
 using LeFauxMatt.HelpForHire.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -15,16 +17,25 @@ namespace LeFauxMatt.HelpForHire.Menus
         /*********
         ** Fields
         *********/
-        private ICustomChoresApi _customChoresApi;
+        private readonly ICustomChoresApi _customChoresApi;
 
         /// <summary>A list of chores with assets and config related to the shop menu.</summary>
         private readonly IDictionary<string, ChoreHandler> _chores;
 
         /// <summary>A list of chore keys sorted by their display name.</summary>
         private readonly IList<string> _choreKeys;
+        
+        /// <summary>The index of the current chore selected.</summary>
         private int _currentChoreIndex = 0;
+        
+        /// <summary>Returns the current chore object.</summary>
         internal ChoreHandler CurrentChore => _chores[_choreKeys[_currentChoreIndex]];
 
+        /// <summary>Tracks the total cost of purchased chores.</summary>
+        internal int TotalCosts =>
+            _chores.Values
+                .Where(chore => chore.IsPurchased)
+                .Sum(chore => chore.Price);
         private static int MaxWidthOfImage { get; } = 384;
         private static int MaxHeightOfImage { get; } = 384;
         private static int MaxWidthOfDescription { get; } = 512;
@@ -43,9 +54,9 @@ namespace LeFauxMatt.HelpForHire.Menus
 
             // create ordered list
             _choreKeys = (
-                from chore in chores
-                orderby chore.Value.DisplayName.Tokens(_customChoresApi.GetChoreTokens(chore.Key)).ToString()
-                select chore.Key).ToList();
+                from chore in _chores.Values
+                orderby chore.DisplayName
+                select chore.ChoreName).ToList();
 
             ResetBounds();
         }
@@ -94,7 +105,8 @@ namespace LeFauxMatt.HelpForHire.Menus
             base.draw(b);
 
             var tokens = _customChoresApi.GetChoreTokens(CurrentChore.ChoreName);
-            
+            CurrentChore.ClearTranslationCache();
+
             // Chore Preview
             IClickableMenu.drawTextureBox(b,
                 xPositionOnScreen,
@@ -109,7 +121,7 @@ namespace LeFauxMatt.HelpForHire.Menus
 
             // Chore Display Name
             SpriteText.drawStringWithScrollCenteredAt(b,
-                CurrentChore.DisplayName.Tokens(tokens),
+                CurrentChore.DisplayName,
                 xPositionOnScreen + MaxWidthOfImage + MaxWidthOfDescription / 2 + 60,
                 yPositionOnScreen,
                 MaxWidthOfDescription - 64,
@@ -124,7 +136,7 @@ namespace LeFauxMatt.HelpForHire.Menus
                 Color.White);
 
             Utility.drawTextWithShadow(b,
-                Game1.parseText(CurrentChore.Description.Tokens(tokens), Game1.dialogueFont, MaxWidthOfDescription),
+                Game1.parseText(CurrentChore.Description, Game1.dialogueFont, MaxWidthOfDescription),
                 Game1.dialogueFont,
                 new Vector2(xPositionOnScreen + MaxWidthOfImage + spaceToClearSideBorder * 3 + 16, yPositionOnScreen + spaceToClearSideBorder + 80),
                 Game1.textColor,
@@ -134,14 +146,14 @@ namespace LeFauxMatt.HelpForHire.Menus
             SpriteText.drawString(b,
                 "$",
                 xPositionOnScreen + MaxWidthOfImage + spaceToClearSideBorder * 3 + 32,
-                yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 16,
+                yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 64,
                 999999, -1, 999999, 1f, 0.88f, false, -1, "", -1, SpriteText.ScrollTextAlignment.Left);
 
             Utility.drawTextWithShadow(b,
                 Game1.content.LoadString("Strings\\StringsFromCSFiles:LoadGameMenu.cs.11020", CurrentChore.Price),
                 Game1.dialogueFont,
                 new Vector2(xPositionOnScreen + MaxWidthOfImage + spaceToClearSideBorder * 3 + 100,
-                    yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 16),
+                    yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 64),
                 Game1.player.Money >= CurrentChore.Price ? Game1.textColor : Color.Red,
                 1f, -1f, -1, -1, 0.25f, 3);
 
@@ -150,8 +162,18 @@ namespace LeFauxMatt.HelpForHire.Menus
                 CurrentChore.IsPurchased ? HelpForHire.PurchasedLabel : HelpForHire.NotPurchasedLabel,
                 Game1.dialogueFont,
                 new Vector2(xPositionOnScreen + MaxWidthOfImage + MaxWidthOfDescription / 2 + spaceToClearSideBorder * 3,
-                    yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 16),
+                    yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 64),
                 CurrentChore.IsPurchased ? Game1.textColor : Color.Red,
+                1f, -1f, -1, -1, 0.25f, 3);
+            
+            // Total Costs of Purchased Chores
+            Utility.drawTextWithShadow(b,
+                HelpForHire.TotalCosts + ": " +
+                    Game1.content.LoadString("Strings\\StringsFromCSFiles:LoadGameMenu.cs.11020", TotalCosts),
+            Game1.dialogueFont,
+                new Vector2(xPositionOnScreen + MaxWidthOfImage + spaceToClearSideBorder * 3 + 32,
+                    yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 16),
+                Game1.textColor,
                 1f, -1f, -1, -1, 0.25f, 3);
 
             _backButton.draw(b);

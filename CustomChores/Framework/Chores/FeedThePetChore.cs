@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using LeFauxMatt.CustomChores.Models;
-using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
+﻿using LeFauxMatt.CustomChores.Models;
 using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores

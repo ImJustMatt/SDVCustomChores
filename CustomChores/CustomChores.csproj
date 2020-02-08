@@ -42,6 +42,7 @@
     <LangVersion>7.3</LangVersion>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -85,6 +86,7 @@
     <Compile Include="Framework\CustomChoresApi.cs" />
     <Compile Include="CustomChores.cs" />
     <Compile Include="Models\ChoreData.cs" />
+    <Compile Include="Models\TranslationData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

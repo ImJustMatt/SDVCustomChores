@@ -68,9 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="HelpfulSpouses.cs" />
-    <Compile Include="Models\ChoreHandler.cs" />
     <Compile Include="Models\ModConfig.cs" />
-    <Compile Include="Models\TranslationData.cs" />
     <Compile Include="NPCPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
