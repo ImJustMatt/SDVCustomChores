@@ -29,9 +29,13 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _enableGreenhouse = !(enableGreenhouse is bool b3) || b3;
         }
 
-        public override bool CanDoIt()
+        public override bool CanDoIt(bool today = true)
         {
-            if (Game1.isRaining || Game1.currentSeason.Equals("winter", StringComparison.CurrentCultureIgnoreCase))
+            _cropsWatered = 0;
+            _hoeDirt = null;
+
+            if (today && (Game1.isRaining ||
+                           Game1.currentSeason.Equals("winter", StringComparison.CurrentCultureIgnoreCase)))
                 return false;
 
             var locations =
@@ -50,7 +54,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _hoeDirt = locations
                 .SelectMany(location => location.terrainFeatures.Values)
                 .OfType<HoeDirt>()
-                .Where(hoeDirt => hoeDirt.needsWatering())
                 .ToList();
 
             return _hoeDirt.Any();
@@ -58,7 +61,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool DoIt()
         {
-            _cropsWatered = 0;
             foreach (var hoeDirt in _hoeDirt)
             {
                 if (!hoeDirt.needsWatering())
@@ -83,6 +85,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _cropsWatered.ToString(CultureInfo.InvariantCulture);
 
         public string GetWorkNeeded() =>
-            _hoeDirt.Count.ToString(CultureInfo.InvariantCulture);
+            _hoeDirt?.Count.ToString(CultureInfo.InvariantCulture);
     }
 }

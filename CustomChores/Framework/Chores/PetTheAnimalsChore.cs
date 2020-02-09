@@ -24,20 +24,21 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _enableCoops = !(enableCoops is bool b2) || b2;
         }
 
-        public override bool CanDoIt()
+        public override bool CanDoIt(bool today = true)
         {
+            _animalsPetted = 0;
+
             _farmAnimals = (
                 from farmAnimal in Game1.getFarm().getAllFarmAnimals()
-                where !farmAnimal.wasPet.Value &&
-                      ((_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn", StringComparison.CurrentCultureIgnoreCase)) || 
-                       (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop", StringComparison.CurrentCultureIgnoreCase)))
+                where (_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn", StringComparison.CurrentCultureIgnoreCase)) || 
+                       (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop", StringComparison.CurrentCultureIgnoreCase))
                 select farmAnimal).ToList();
+            
             return _farmAnimals.Any();
         }
 
         public override bool DoIt()
         {
-            _animalsPetted = 0;
             foreach (var farmAnimal in _farmAnimals)
             {
                 if (farmAnimal.wasPet)

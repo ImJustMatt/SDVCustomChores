@@ -49,12 +49,42 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                     select Convert.ToInt32(a, CultureInfo.InvariantCulture);
         }
 
-        public override bool CanDoIt()
+        public override bool CanDoIt(bool today = true)
         {
+            _items = null;
+            _giftsGiven = _maxGifts > 1 ? Game1.random.Next(1, _maxGifts) : 1;
+
             if (!_giftType.Equals("Birthday", StringComparison.CurrentCultureIgnoreCase))
                 return true;
-            _todayBirthdayNpc = Utility.getTodaysBirthdayNPC(Game1.currentSeason, Game1.dayOfMonth);
-            _giftsGiven = _maxGifts > 1 ? Game1.random.Next(1, _maxGifts) : 1;
+
+            if (today)
+                _todayBirthdayNpc = Utility.getTodaysBirthdayNPC(Game1.currentSeason, Game1.dayOfMonth);
+            else if (Game1.dayOfMonth < 28)
+                _todayBirthdayNpc = Utility.getTodaysBirthdayNPC(Game1.currentSeason, Game1.dayOfMonth + 1);
+            else
+            {
+                string nextSeason;
+                switch (Game1.currentSeason)
+                {
+                    case "spring":
+                        nextSeason = "summer";
+                        break;
+                    case "summer":
+                        nextSeason = "fall";
+                        break;
+                    case "fall":
+                        nextSeason = "winter";
+                        break;
+                    case "winter":
+                        nextSeason = "spring";
+                        break;
+                    default:
+                        nextSeason = Game1.currentSeason;
+                        break;
+                }
+                _todayBirthdayNpc = Utility.getTodaysBirthdayNPC(nextSeason, 1);
+            }
+
             return _todayBirthdayNpc != null && !_todayBirthdayNpc.getName().Equals(Game1.player.getSpouse().getName(), StringComparison.CurrentCultureIgnoreCase);
         }
 

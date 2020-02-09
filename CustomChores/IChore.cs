@@ -13,7 +13,8 @@ namespace LeFauxMatt.CustomChores
         ** Public methods
         *********/
         /// <summary>Returns true if chore can be performed based on the current days conditions.</summary>
-        bool CanDoIt();
+        /// <param name="today">Check eligibility based today's conditions.</param>
+        bool CanDoIt(bool today = true);
 
         /// <summary>Performs the chore and returns true/false on success or failure.</summary>
         bool DoIt();

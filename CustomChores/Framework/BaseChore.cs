@@ -18,7 +18,7 @@ namespace LeFauxMatt.CustomChores.Framework
             ChoreData = choreData;
         }
 
-        public abstract bool CanDoIt();
+        public abstract bool CanDoIt(bool today = true);
         public abstract bool DoIt();
 
         public virtual IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)

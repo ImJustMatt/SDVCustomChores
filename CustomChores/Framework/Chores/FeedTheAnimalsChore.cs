@@ -27,8 +27,11 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _enableCoops = !(enableCoops is bool b2) || b2;
         }
 
-        public override bool CanDoIt()
+        public override bool CanDoIt(bool today = true)
         {
+            _animalsFed = 0;
+            _animalHouses.Clear();
+
             var animalHouses = (
                     from building in Game1.getFarm().buildings
                     where building.daysOfConstructionLeft <= 0 &&
@@ -38,7 +41,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                 .OfType<AnimalHouse>()
                 .ToList();
 
-            _animalHouses.Clear();
             foreach (var animalHouse in animalHouses)
             {
                 _animalHouses.Add(animalHouse, GetAnimalTroughs(animalHouse));
@@ -49,7 +51,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool DoIt()
         {
-            _animalsFed = 0;
             foreach (var animalHouse in _animalHouses)
             {
                 foreach (var key in animalHouse.Value)

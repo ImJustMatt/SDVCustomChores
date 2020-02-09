@@ -15,8 +15,10 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public WaterTheSlimesChore(ChoreData choreData) : base(choreData) { }
 
-        public override bool CanDoIt()
+        public override bool CanDoIt(bool tomorrow = false)
         {
+            _slimesWatered = 0;
+
             _slimeHutches =  (
                 from building in Game1.getFarm().buildings
                 where building.daysOfConstructionLeft.Value <= 0
@@ -28,7 +30,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool DoIt()
         {
-            _slimesWatered = 0;
             foreach (var slimeHutch in _slimeHutches)
             {
                 for (var index = 0; index < slimeHutch.waterSpots.Count; ++index)

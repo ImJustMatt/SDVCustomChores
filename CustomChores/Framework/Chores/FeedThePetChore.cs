@@ -1,4 +1,5 @@
-﻿using LeFauxMatt.CustomChores.Models;
+﻿using System;
+using LeFauxMatt.CustomChores.Models;
 using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
@@ -7,9 +8,10 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
     {
         public FeedThePetChore(ChoreData choreData) : base(choreData) { }
 
-        public override bool CanDoIt()
+        public override bool CanDoIt(bool today = true)
         {
-            return !Game1.isRaining && !Game1.getFarm().petBowlWatered.Value;
+            return (today && !Game1.isRaining && Game1.player.getPet() != null && !Game1.getFarm().petBowlWatered.Value)
+                   || (!today && Game1.weatherForTomorrow != 1 && Game1.weatherForTomorrow != 3 && Game1.player.getPet() != null);
         }
 
         public override bool DoIt()

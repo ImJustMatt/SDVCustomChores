@@ -28,8 +28,10 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _enableOutdoors = !(enableOutdoors is bool b3) || b3;
         }
 
-        public override bool CanDoIt()
+        public override bool CanDoIt(bool today = true)
         {
+            _fencesRepaired = 0;
+
             var locations =
                 from location in Game1.locations
                 where (_enableFarm && location.IsFarm) ||
@@ -46,7 +48,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _fences = locations
                 .SelectMany(location => location.objects.Values)
                 .OfType<Fence>()
-                .Where(fence => fence.health.Value < fence.maxHealth.Value)
                 .ToList();
             
             return _fences.Any();
@@ -54,9 +55,10 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool DoIt()
         {
-            _fencesRepaired = 0;
             foreach (var fence in _fences)
             {
+                if (fence.getHealth() >= fence.maxHealth.Value)
+                    continue;
                 fence.repair();
                 ++_fencesRepaired;
             }
