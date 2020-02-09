@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
 using StardewModdingAPI;
@@ -12,6 +13,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         private IEnumerable<FarmAnimal> _farmAnimals;
         private readonly bool _enableBarns;
         private readonly bool _enableCoops;
+        private int _animalsPetted;
 
         public PetTheAnimalsChore(ChoreData choreData) : base(choreData)
         {
@@ -35,9 +37,14 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool DoIt()
         {
+            _animalsPetted = 0;
             foreach (var farmAnimal in _farmAnimals)
             {
+
+                if (farmAnimal.wasPet)
+                    continue;
                 farmAnimal.pet(Game1.player);
+                ++_animalsPetted;
             }
 
             return true;
@@ -47,17 +54,21 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         {
             var tokens = base.GetTokens(contentHelper);
             tokens.Add("AnimalName", GetFarmAnimalName);
+            tokens.Add("AnimalsPetted", GetAnimalsPetted);
+            tokens.Add("WorkDone", GetAnimalsPetted);
             return tokens;
         }
 
         public string GetFarmAnimalName()
         {
-            var farmAnimals =
+            var farmAnimals = (
                 from farmAnimal in Game1.getFarm().getAllFarmAnimals()
-                where (_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn")) ||
-                      (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop"))
-                select farmAnimal;
+                where (_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn", StringComparison.CurrentCultureIgnoreCase)) ||
+                      (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop", StringComparison.CurrentCultureIgnoreCase))
+                select farmAnimal).ToList();
             return farmAnimals.Any() ? farmAnimals.Shuffle().First().Name : null;
         }
+
+        public string GetAnimalsPetted() => _animalsPetted.ToString(CultureInfo.InvariantCulture);
     }
 }

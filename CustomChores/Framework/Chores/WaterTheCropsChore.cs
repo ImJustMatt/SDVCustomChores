@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
@@ -13,6 +16,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         private readonly bool _enableFarm;
         private readonly bool _enableBuildings;
         private readonly bool _enableGreenhouse;
+        private int _cropsWatered;
 
         public WaterTheCropsChore(ChoreData choreData) : base(choreData)
         {
@@ -47,17 +51,34 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                 .SelectMany(location => location.terrainFeatures.Values)
                 .OfType<HoeDirt>();
 
+            _hoeDirt = locations
+                .SelectMany(location => location.terrainFeatures.Values)
+                .OfType<HoeDirt>()
+                .Where(hoeDirt => hoeDirt.needsWatering());
+
             return _hoeDirt.Any();
         }
 
         public override bool DoIt()
         {
+            _cropsWatered = 0;
             foreach (var hoeDirt in _hoeDirt)
             {
                 hoeDirt.state.Value = HoeDirt.watered;
+                _cropsWatered++;
             }
             
             return true;
         }
+
+        public override IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
+        {
+            var tokens = base.GetTokens(contentHelper);
+            tokens.Add("CropsWatered", GetCropsWatered);
+            tokens.Add("WorkDone", GetCropsWatered);
+            return tokens;
+        }
+
+        public string GetCropsWatered() => _cropsWatered.ToString(CultureInfo.InvariantCulture);
     }
 }

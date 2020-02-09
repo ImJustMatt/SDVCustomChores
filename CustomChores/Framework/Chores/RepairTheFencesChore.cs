@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 
@@ -12,6 +15,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         private readonly bool _enableFarm;
         private readonly bool _enableBuildings;
         private readonly bool _enableOutdoors;
+        private int _fencesRepaired;
 
         public RepairTheFencesChore(ChoreData choreData) : base(choreData)
         {
@@ -39,19 +43,34 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                     where building.indoors.Value != null
                     select building.indoors.Value);
             
-            _fences = locations.SelectMany(location => location.objects.Values).OfType<Fence>();
+            _fences = locations
+                .SelectMany(location => location.objects.Values)
+                .OfType<Fence>()
+                .Where(fence => fence.health.Value < fence.maxHealth.Value);
             
             return _fences.Any();
         }
 
         public override bool DoIt()
         {
+            _fencesRepaired = 0;
             foreach (var fence in _fences)
             {
                 fence.repair();
+                ++_fencesRepaired;
             }
 
             return true;
         }
+
+        public override IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
+        {
+            var tokens = base.GetTokens(contentHelper);
+            tokens.Add("FencesRepaired", GetFencesRepaired);
+            tokens.Add("WorkDone", GetFencesRepaired);
+            return tokens;
+        }
+
+        public string GetFencesRepaired() => _fencesRepaired.ToString(CultureInfo.InvariantCulture);
     }
 }
