@@ -11,7 +11,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class RepairTheFencesChore : BaseChore
     {
-        private IEnumerable<Fence> _fences;
+        private IList<Fence> _fences;
         private readonly bool _enableFarm;
         private readonly bool _enableBuildings;
         private readonly bool _enableOutdoors;
@@ -46,7 +46,8 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _fences = locations
                 .SelectMany(location => location.objects.Values)
                 .OfType<Fence>()
-                .Where(fence => fence.health.Value < fence.maxHealth.Value);
+                .Where(fence => fence.health.Value < fence.maxHealth.Value)
+                .ToList();
             
             return _fences.Any();
         }
@@ -68,9 +69,14 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             var tokens = base.GetTokens(contentHelper);
             tokens.Add("FencesRepaired", GetFencesRepaired);
             tokens.Add("WorkDone", GetFencesRepaired);
+            tokens.Add("WorkNeeded", GetWorkNeeded);
             return tokens;
         }
 
-        public string GetFencesRepaired() => _fencesRepaired.ToString(CultureInfo.InvariantCulture);
+        public string GetFencesRepaired() =>
+            _fencesRepaired.ToString(CultureInfo.InvariantCulture);
+
+        public string GetWorkNeeded() =>
+            _fences.Count.ToString(CultureInfo.InvariantCulture);
     }
 }

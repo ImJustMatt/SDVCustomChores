@@ -49,9 +49,14 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             var tokens = base.GetTokens(contentHelper);
             tokens.Add("SlimesWatered", GetSlimesWatered);
             tokens.Add("WorkDone", GetSlimesWatered);
+            tokens.Add("WorkNeeded", GetWorkNeeded);
             return tokens;
         }
 
-        public string GetSlimesWatered() => _slimesWatered.ToString(CultureInfo.InvariantCulture);
+        public string GetSlimesWatered() =>
+            _slimesWatered.ToString(CultureInfo.InvariantCulture);
+
+        public string GetWorkNeeded() =>
+            _slimeHutches.Sum(slimeHutch => slimeHutch.waterSpots.Count).ToString(CultureInfo.InvariantCulture);
     }
 }

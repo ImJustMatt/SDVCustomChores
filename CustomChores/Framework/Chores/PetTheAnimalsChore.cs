@@ -10,7 +10,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class PetTheAnimalsChore : BaseChore
     {
-        private IEnumerable<FarmAnimal> _farmAnimals;
+        private IList<FarmAnimal> _farmAnimals;
         private readonly bool _enableBarns;
         private readonly bool _enableCoops;
         private int _animalsPetted;
@@ -26,12 +26,12 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool CanDoIt()
         {
-            _farmAnimals =
+            _farmAnimals = (
                 from farmAnimal in Game1.getFarm().getAllFarmAnimals()
                 where !farmAnimal.wasPet.Value &&
-                      ((_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn")) || 
-                       (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop")))
-                select farmAnimal;
+                      ((_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn", StringComparison.CurrentCultureIgnoreCase)) || 
+                       (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop", StringComparison.CurrentCultureIgnoreCase)))
+                select farmAnimal).ToList();
             return _farmAnimals.Any();
         }
 
@@ -40,7 +40,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _animalsPetted = 0;
             foreach (var farmAnimal in _farmAnimals)
             {
-
                 if (farmAnimal.wasPet)
                     continue;
                 farmAnimal.pet(Game1.player);
@@ -56,6 +55,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             tokens.Add("AnimalName", GetFarmAnimalName);
             tokens.Add("AnimalsPetted", GetAnimalsPetted);
             tokens.Add("WorkDone", GetAnimalsPetted);
+            tokens.Add("WorkNeeded", GetWorkNeeded);
             return tokens;
         }
 
@@ -68,7 +68,10 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                 select farmAnimal).ToList();
             return farmAnimals.Any() ? farmAnimals.Shuffle().First().Name : null;
         }
+        public string GetAnimalsPetted() =>
+            _animalsPetted.ToString(CultureInfo.InvariantCulture);
 
-        public string GetAnimalsPetted() => _animalsPetted.ToString(CultureInfo.InvariantCulture);
+        public string GetWorkNeeded() =>
+            _farmAnimals.Count.ToString(CultureInfo.InvariantCulture);
     }
 }

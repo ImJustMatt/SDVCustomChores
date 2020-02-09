@@ -13,7 +13,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class FeedTheAnimalsChore : BaseChore
     {
-        private IEnumerable<AnimalHouse> _animalHouses;
+        private readonly IDictionary<AnimalHouse, IList<Vector2>> _animalHouses = new Dictionary<AnimalHouse, IList<Vector2>>();
         private readonly bool _enableBarns;
         private readonly bool _enableCoops;
         private int _animalsFed;
@@ -29,15 +29,22 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool CanDoIt()
         {
-            _animalsFed = 0;
-            _animalHouses = (
+            var animalHouses = (
                     from building in Game1.getFarm().buildings
                     where building.daysOfConstructionLeft <= 0 &&
                           ((_enableBarns && building is Barn) ||
                            (_enableCoops && building is Coop))
                     select building.indoors.Value)
-                .OfType<AnimalHouse>();
-            return _animalHouses.Any();
+                .OfType<AnimalHouse>()
+                .ToList();
+
+            _animalHouses.Clear();
+            foreach (var animalHouse in animalHouses)
+            {
+                _animalHouses.Add(animalHouse, GetAnimalTroughs(animalHouse));
+            }
+
+            return _animalHouses.Sum(animalHouse => animalHouse.Value.Count) > 0;
         }
 
         public override bool DoIt()
@@ -45,7 +52,14 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _animalsFed = 0;
             foreach (var animalHouse in _animalHouses)
             {
-                _animalsFed += FeedAllAnimals(animalHouse);
+                foreach (var key in animalHouse.Value)
+                {
+                    if (Game1.getFarm().piecesOfHay <= 0)
+                        continue;
+                    animalHouse.Key.objects.Add(key, new SObject(178, 1));
+                    --Game1.getFarm().piecesOfHay.Value;
+                    ++_animalsFed;
+                }
             }
 
             return true;
@@ -57,6 +71,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             tokens.Add("AnimalName", GetFarmAnimalName);
             tokens.Add("AnimalsFed", GetAnimalsFed);
             tokens.Add("WorkDone", GetAnimalsFed);
+            tokens.Add("WorkNeeded", GetWorkNeeded);
             return tokens;
         }
 
@@ -70,11 +85,15 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return farmAnimals.Any() ? farmAnimals.Shuffle().First().Name : null;
         }
 
-        public string GetAnimalsFed() => _animalsFed.ToString(CultureInfo.InvariantCulture);
+        public string GetAnimalsFed() =>
+            _animalsFed.ToString(CultureInfo.InvariantCulture);
+        public string GetWorkNeeded() =>
+            _animalHouses.Sum(animalHouse => animalHouse.Value.Count)
+                .ToString(CultureInfo.InvariantCulture);
 
-        private static int FeedAllAnimals(AnimalHouse animalHouse)
+        private static IList<Vector2> GetAnimalTroughs(AnimalHouse animalHouse)
         {
-            var animalsFed = 0;
+            var animalTroughs = new List<Vector2>();
             for (var xTile = 0; xTile < animalHouse.map.Layers[0].LayerWidth; ++xTile)
             {
                 for (var yTile = 0; yTile < animalHouse.map.Layers[0].LayerHeight; ++yTile)
@@ -82,16 +101,14 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                     if (animalHouse.doesTileHaveProperty(xTile, yTile, "Trough", "Back") == null)
                         continue;
                     var key = new Vector2(xTile, yTile);
-                    if (animalHouse.objects.ContainsKey(key) || Game1.getFarm().piecesOfHay <= 0)
+                    if (animalHouse.objects.ContainsKey(key))
                         continue;
-                    animalHouse.objects.Add(key, new SObject(178, 1));
-                    --Game1.getFarm().piecesOfHay.Value;
-                    ++animalsFed;
-                    if (animalsFed >= animalHouse.animalLimit)
-                        return animalsFed;
+                    animalTroughs.Add(key);
+                    if (animalTroughs.Count >= animalHouse.animalLimit)
+                        return animalTroughs;
                 }
             }
-            return animalsFed;
+            return animalTroughs;
         }
     }
 }

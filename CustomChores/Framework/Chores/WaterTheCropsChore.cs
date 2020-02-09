@@ -12,7 +12,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class WaterTheCropsChore : BaseChore
     {
-        private IEnumerable<HoeDirt> _hoeDirt;
+        private IList<HoeDirt> _hoeDirt;
         private readonly bool _enableFarm;
         private readonly bool _enableBuildings;
         private readonly bool _enableGreenhouse;
@@ -31,7 +31,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public override bool CanDoIt()
         {
-            if (Game1.isRaining || Game1.currentSeason.Equals("winter"))
+            if (Game1.isRaining || Game1.currentSeason.Equals("winter", StringComparison.CurrentCultureIgnoreCase))
                 return false;
 
             var locations =
@@ -49,12 +49,9 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             
             _hoeDirt = locations
                 .SelectMany(location => location.terrainFeatures.Values)
-                .OfType<HoeDirt>();
-
-            _hoeDirt = locations
-                .SelectMany(location => location.terrainFeatures.Values)
                 .OfType<HoeDirt>()
-                .Where(hoeDirt => hoeDirt.needsWatering());
+                .Where(hoeDirt => hoeDirt.needsWatering())
+                .ToList();
 
             return _hoeDirt.Any();
         }
@@ -64,6 +61,8 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _cropsWatered = 0;
             foreach (var hoeDirt in _hoeDirt)
             {
+                if (!hoeDirt.needsWatering())
+                    continue;
                 hoeDirt.state.Value = HoeDirt.watered;
                 _cropsWatered++;
             }
@@ -76,9 +75,14 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             var tokens = base.GetTokens(contentHelper);
             tokens.Add("CropsWatered", GetCropsWatered);
             tokens.Add("WorkDone", GetCropsWatered);
+            tokens.Add("WorkNeeded", GetWorkNeeded);
             return tokens;
         }
 
-        public string GetCropsWatered() => _cropsWatered.ToString(CultureInfo.InvariantCulture);
+        public string GetCropsWatered() =>
+            _cropsWatered.ToString(CultureInfo.InvariantCulture);
+
+        public string GetWorkNeeded() =>
+            _hoeDirt.Count.ToString(CultureInfo.InvariantCulture);
     }
 }

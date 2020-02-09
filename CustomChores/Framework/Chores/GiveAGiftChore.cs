@@ -54,6 +54,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             if (!_giftType.Equals("Birthday", StringComparison.CurrentCultureIgnoreCase))
                 return true;
             _todayBirthdayNpc = Utility.getTodaysBirthdayNPC(Game1.currentSeason, Game1.dayOfMonth);
+            _giftsGiven = _maxGifts > 1 ? Game1.random.Next(1, _maxGifts) : 1;
             return _todayBirthdayNpc != null && !_todayBirthdayNpc.getName().Equals(Game1.player.getSpouse().getName(), StringComparison.CurrentCultureIgnoreCase);
         }
 
@@ -121,7 +122,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                 select objectInfo;
 
             // Store items to give to player
-            _giftsGiven = _maxGifts > 1 ? Game1.random.Next(1, _maxGifts) : 1;
             _items = objects.Shuffle().Take(_giftsGiven)
                 .ToDictionary(
                     item => item.Key,
@@ -139,6 +139,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             tokens.Add("BirthdayGender", GetBirthdayGender);
             tokens.Add("GiftsGiven", GetGiftsGiven);
             tokens.Add("WorkDone", GetGiftsGiven);
+            tokens.Add("WorkNeeded", GetWorkNeeded);
             return tokens;
         }
 
@@ -155,6 +156,9 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             Utility.getTodaysBirthdayNPC(Game1.currentSeason, Game1.dayOfMonth)?.Gender == 1 ? "Female" : "Male";
 
         public string GetGiftsGiven() =>
+            _items.Count.ToString(CultureInfo.InvariantCulture);
+
+        public string GetWorkNeeded() =>
             _giftsGiven.ToString(CultureInfo.InvariantCulture);
     }
 }
