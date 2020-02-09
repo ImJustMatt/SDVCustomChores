@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 
@@ -66,19 +65,19 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return true;
         }
 
-        public override IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
+        public override IDictionary<string, Func<string>> GetTokens()
         {
-            var tokens = base.GetTokens(contentHelper);
+            var tokens = base.GetTokens();
             tokens.Add("FencesRepaired", GetFencesRepaired);
             tokens.Add("WorkDone", GetFencesRepaired);
             tokens.Add("WorkNeeded", GetWorkNeeded);
             return tokens;
         }
 
-        public string GetFencesRepaired() =>
+        private string GetFencesRepaired() =>
             _fencesRepaired.ToString(CultureInfo.InvariantCulture);
 
-        public string GetWorkNeeded() =>
+        private string GetWorkNeeded() =>
             _fences.Count.ToString(CultureInfo.InvariantCulture);
     }
 }

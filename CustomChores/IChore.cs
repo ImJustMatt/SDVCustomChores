@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using LeFauxMatt.CustomChores.Models;
-using StardewModdingAPI;
 
 namespace LeFauxMatt.CustomChores
 {
@@ -20,6 +19,6 @@ namespace LeFauxMatt.CustomChores
         bool DoIt();
 
         /// <summary>Returns tokens for substitution.</summary>
-        IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper);
+        IDictionary<string, Func<string>> GetTokens();
     }
 }

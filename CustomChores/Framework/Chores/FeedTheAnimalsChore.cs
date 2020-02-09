@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
 using Microsoft.Xna.Framework;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 using SObject = StardewValley.Object;
@@ -66,9 +65,9 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return true;
         }
 
-        public override IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
+        public override IDictionary<string, Func<string>> GetTokens()
         {
-            var tokens = base.GetTokens(contentHelper);
+            var tokens = base.GetTokens();
             tokens.Add("AnimalName", GetFarmAnimalName);
             tokens.Add("AnimalsFed", GetAnimalsFed);
             tokens.Add("WorkDone", GetAnimalsFed);
@@ -86,9 +85,9 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return farmAnimals.Any() ? farmAnimals.Shuffle().First().Name : null;
         }
 
-        public string GetAnimalsFed() =>
+        private string GetAnimalsFed() =>
             _animalsFed.ToString(CultureInfo.InvariantCulture);
-        public string GetWorkNeeded() =>
+        private string GetWorkNeeded() =>
             _animalHouses.Sum(animalHouse => animalHouse.Value.Count)
                 .ToString(CultureInfo.InvariantCulture);
 

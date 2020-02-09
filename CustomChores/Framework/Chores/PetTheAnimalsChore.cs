@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
-using StardewModdingAPI;
 using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
@@ -50,9 +49,9 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return true;
         }
 
-        public override IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
+        public override IDictionary<string, Func<string>> GetTokens()
         {
-            var tokens = base.GetTokens(contentHelper);
+            var tokens = base.GetTokens();
             tokens.Add("AnimalName", GetFarmAnimalName);
             tokens.Add("AnimalsPetted", GetAnimalsPetted);
             tokens.Add("WorkDone", GetAnimalsPetted);
@@ -60,7 +59,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return tokens;
         }
 
-        public string GetFarmAnimalName()
+        private string GetFarmAnimalName()
         {
             var farmAnimals = (
                 from farmAnimal in Game1.getFarm().getAllFarmAnimals()
@@ -69,10 +68,10 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                 select farmAnimal).ToList();
             return farmAnimals.Any() ? farmAnimals.Shuffle().First().Name : null;
         }
-        public string GetAnimalsPetted() =>
+        private string GetAnimalsPetted() =>
             _animalsPetted.ToString(CultureInfo.InvariantCulture);
 
-        public string GetWorkNeeded() =>
+        private string GetWorkNeeded() =>
             _farmAnimals.Count.ToString(CultureInfo.InvariantCulture);
     }
 }

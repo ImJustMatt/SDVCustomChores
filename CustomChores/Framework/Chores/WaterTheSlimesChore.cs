@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
-using StardewModdingAPI;
 using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
@@ -15,7 +14,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 
         public WaterTheSlimesChore(ChoreData choreData) : base(choreData) { }
 
-        public override bool CanDoIt(bool tomorrow = false)
+        public override bool CanDoIt(bool today = true)
         {
             _slimesWatered = 0;
 
@@ -45,19 +44,19 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return true;
         }
 
-        public override IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
+        public override IDictionary<string, Func<string>> GetTokens()
         {
-            var tokens = base.GetTokens(contentHelper);
+            var tokens = base.GetTokens();
             tokens.Add("SlimesWatered", GetSlimesWatered);
             tokens.Add("WorkDone", GetSlimesWatered);
             tokens.Add("WorkNeeded", GetWorkNeeded);
             return tokens;
         }
 
-        public string GetSlimesWatered() =>
+        private string GetSlimesWatered() =>
             _slimesWatered.ToString(CultureInfo.InvariantCulture);
 
-        public string GetWorkNeeded() =>
+        private string GetWorkNeeded() =>
             _slimeHutches.Sum(slimeHutch => slimeHutch.waterSpots.Count).ToString(CultureInfo.InvariantCulture);
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
@@ -72,19 +71,19 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return true;
         }
 
-        public override IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
+        public override IDictionary<string, Func<string>> GetTokens()
         {
-            var tokens = base.GetTokens(contentHelper);
+            var tokens = base.GetTokens();
             tokens.Add("CropsWatered", GetCropsWatered);
             tokens.Add("WorkDone", GetCropsWatered);
             tokens.Add("WorkNeeded", GetWorkNeeded);
             return tokens;
         }
 
-        public string GetCropsWatered() =>
+        private string GetCropsWatered() =>
             _cropsWatered.ToString(CultureInfo.InvariantCulture);
 
-        public string GetWorkNeeded() =>
+        private string GetWorkNeeded() =>
             _hoeDirt?.Count.ToString(CultureInfo.InvariantCulture);
     }
 }

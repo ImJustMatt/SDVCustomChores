@@ -21,10 +21,10 @@ namespace LeFauxMatt.CustomChores.Framework
         public abstract bool CanDoIt(bool today = true);
         public abstract bool DoIt();
 
-        public virtual IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
+        public virtual IDictionary<string, Func<string>> GetTokens()
         {
             var spouse = Game1.player.getSpouse();
-
+            
             return new Dictionary<string, Func<string>>(StringComparer.OrdinalIgnoreCase)
             {
                 // date and weather
@@ -32,7 +32,7 @@ namespace LeFauxMatt.CustomChores.Framework
                     "Day", () => SDate.Now().Day.ToString(CultureInfo.InvariantCulture)
                 },
                 {
-                    "DayEvent", () => GetDayEvent(contentHelper)
+                    "DayEvent", GetDayEvent
                 },
                 {
                     "DaysPlayed", () => Game1.stats.DaysPlayed.ToString(CultureInfo.InvariantCulture)
@@ -87,7 +87,7 @@ namespace LeFauxMatt.CustomChores.Framework
             };
         }
 
-        private static string GetDayEvent(IContentHelper contentHelper)
+        private static string GetDayEvent()
         {
             // marriage
             if (SaveGame.loaded?.weddingToday ?? Game1.weddingToday)
@@ -95,7 +95,7 @@ namespace LeFauxMatt.CustomChores.Framework
 
             // festival
             IDictionary<string, string> festivalDates =
-                contentHelper.Load<Dictionary<string, string>>("Day\\Festivals\\FestivalDates",
+                CustomChores.Instance.Helper.Content.Load<Dictionary<string, string>>("Day\\Festivals\\FestivalDates",
                     ContentSource.GameContent);
 
             return festivalDates.TryGetValue($"{Game1.currentSeason}{Game1.dayOfMonth}", out var festivalName) ? festivalName : null;

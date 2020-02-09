@@ -1,5 +1,4 @@
-﻿using System;
-using LeFauxMatt.CustomChores.Models;
+﻿using LeFauxMatt.CustomChores.Models;
 using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores

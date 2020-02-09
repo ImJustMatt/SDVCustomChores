@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
-using StardewModdingAPI;
 using StardewValley;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
@@ -160,9 +159,9 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return true;
         }
 
-        public override IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
+        public override IDictionary<string, Func<string>> GetTokens()
         {
-            var tokens = base.GetTokens(contentHelper);
+            var tokens = base.GetTokens();
             tokens.Add("ItemName", GetItemName);
             tokens.Add("ItemId", GetItemId);
             tokens.Add("Birthday", GetBirthdayName);
@@ -173,22 +172,22 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return tokens;
         }
 
-        public string GetItemName() =>
+        private string GetItemName() =>
             string.Join(", ", _items.Values);
 
-        public string GetItemId() =>
+        private string GetItemId() =>
             "[" + string.Join("][", _items.Keys) + "]";
 
-        public static string GetBirthdayName() =>
+        private static string GetBirthdayName() =>
             Utility.getTodaysBirthdayNPC(Game1.currentSeason, Game1.dayOfMonth)?.getName();
 
-        public static string GetBirthdayGender() =>
+        private static string GetBirthdayGender() =>
             Utility.getTodaysBirthdayNPC(Game1.currentSeason, Game1.dayOfMonth)?.Gender == 1 ? "Female" : "Male";
 
-        public string GetGiftsGiven() =>
+        private string GetGiftsGiven() =>
             _items.Count.ToString(CultureInfo.InvariantCulture);
 
-        public string GetWorkNeeded() =>
+        private string GetWorkNeeded() =>
             _giftsGiven.ToString(CultureInfo.InvariantCulture);
     }
 }

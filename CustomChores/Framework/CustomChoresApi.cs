@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
-using StardewModdingAPI;
 
 namespace LeFauxMatt.CustomChores.Framework
 {
@@ -11,12 +10,6 @@ namespace LeFauxMatt.CustomChores.Framework
         /*********
         ** Fields
         *********/
-        /// <summary>Content helper to load data assets.</summary>
-        private readonly IContentHelper _contentHelper;
-
-        /// <summary>Encapsulates monitoring and logging.</summary>
-        private readonly IMonitor _monitor;
-
         /// <summary>Adds new types of custom chore.</summary>
         private readonly ChoreBuilder _choreBuilders;
 
@@ -27,14 +20,10 @@ namespace LeFauxMatt.CustomChores.Framework
         ** Public methods
         *********/
         /// <summary>Construct an instance</summary>
-        /// <param name="contentHelper">Content helper to load data assets.</param>
-        /// <param name="monitor">Encapsulates monitoring and logging.</param>
         /// <param name="choreBuilders">The custom chores.</param>
         /// /// <param name="chores"></param>
-        internal CustomChoresApi(IContentHelper contentHelper, IMonitor monitor, ChoreBuilder choreBuilders, IDictionary<string, IChore> chores)
+        internal CustomChoresApi(ChoreBuilder choreBuilders, IDictionary<string, IChore> chores)
         {
-            _contentHelper = contentHelper;
-            _monitor = monitor;
             _choreBuilders = choreBuilders;
             _chores = chores;
         }
@@ -43,7 +32,7 @@ namespace LeFauxMatt.CustomChores.Framework
         /// <param name="factory">A factory which creates an instance of a chore type.</param>
         public void AddChoreFactory(IChoreFactory factory)
         {
-            _monitor.Log($"Adding chore factory: {factory.GetType().AssemblyQualifiedName}", LogLevel.Trace);
+            CustomChores.Instance.Monitor.Log($"Adding chore factory: {factory.GetType().AssemblyQualifiedName}");
             _choreBuilders.AddChoreFactory(factory);
         }
 
@@ -80,7 +69,7 @@ namespace LeFauxMatt.CustomChores.Framework
         public IDictionary<string, Func<string>> GetChoreTokens(string choreName)
         {
             _chores.TryGetValue(choreName, out var chore);
-            return chore?.GetTokens(_contentHelper);
+            return chore?.GetTokens();
         }
     }
 }
