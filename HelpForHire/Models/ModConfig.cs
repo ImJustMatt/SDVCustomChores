@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
 using StardewModdingAPI;
 
 namespace LeFauxMatt.HelpForHire.Models
@@ -16,6 +17,8 @@ namespace LeFauxMatt.HelpForHire.Models
 
         public ModConfig()
         {
+            Instance = this;
+
             Chores.Add("furyx639.FeedTheAnimals", 25);
             Chores.Add("furyx639.FeedThePet", 250);
             Chores.Add("furyx639.PetTheAnimals", 50);
@@ -23,5 +26,7 @@ namespace LeFauxMatt.HelpForHire.Models
             Chores.Add("furyx639.WaterTheCrops", 10);
             Chores.Add("furyx639.WaterTheSlimes", 250);
         }
+
+        public static ModConfig Instance { get; private set; }
     }
 }

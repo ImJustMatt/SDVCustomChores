@@ -18,9 +18,6 @@ namespace LeFauxMatt.HelpForHire
         *********/
         private ICustomChoresApi _customChoresApi;
 
-        /// <summary>The mod configuration.</summary>
-        private ModConfig _config;
-
         /// <summary>A list of chores with assets and config related to the shop menu.</summary>
         private readonly IDictionary<string, ChoreHandler> _chores = new Dictionary<string, ChoreHandler>(StringComparer.OrdinalIgnoreCase);
 
@@ -37,7 +34,7 @@ namespace LeFauxMatt.HelpForHire
         public override void Entry(IModHelper helper)
         {
             // init 
-            _config = helper.ReadConfig<ModConfig>();
+            helper.ReadConfig<ModConfig>();
             PurchasedLabel = helper.Translation.Get("label.purchased");
             NotPurchasedLabel = helper.Translation.Get("label.notPurchased");
             InsufficientFundsLabel = helper.Translation.Get("label.insufficientFunds");
@@ -92,7 +89,7 @@ namespace LeFauxMatt.HelpForHire
                 if (!chore.IsPurchased || !_customChoresApi.CheckChore(chore.ChoreName))
                     continue;
 
-                if (Game1.player.Money < chore.Price)
+                if (Game1.player.Money < chore.EstimatedCost)
                 {
                     insufficientFunds = true;
                     break;
@@ -104,7 +101,7 @@ namespace LeFauxMatt.HelpForHire
                         continue;
 
                     Game1.playSound("purchaseClick");
-                    Game1.player.Money -= chore.Price;
+                    Game1.player.Money -= chore.ActualCost;
                     Monitor.Log($"Successfully performed chore {choreHandler.Key}");
                 }
                 catch (Exception ex)
@@ -137,7 +134,7 @@ namespace LeFauxMatt.HelpForHire
             if (!_chores.Any() && !UpdateChores())
                 return;
 
-            if (e.Button == _config.ShopMenuButton)
+            if (ModConfig.Instance.ShopMenuButton == e.Button)
                 Game1.activeClickableMenu = new ChoreMenu(_chores);
         }
 
@@ -148,13 +145,13 @@ namespace LeFauxMatt.HelpForHire
             // get chores
             var choreKeys =
                 from choreKey in _customChoresApi.GetChores()
-                where _config.Chores.ContainsKey(choreKey)
+                where ModConfig.Instance.Chores.ContainsKey(choreKey)
                 select choreKey;
 
             foreach (var choreKey in choreKeys)
             {
                 var chore = _customChoresApi.GetChore(choreKey);
-                _config.Chores.TryGetValue(choreKey, out var price);
+                ModConfig.Instance.Chores.TryGetValue(choreKey, out var price);
                 _chores.Add(choreKey, new ChoreHandler(chore, price, _customChoresApi));
             }
 
