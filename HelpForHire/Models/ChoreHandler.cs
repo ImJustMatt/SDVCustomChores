@@ -4,7 +4,6 @@ using LeFauxMatt.CustomChores;
 using LeFauxMatt.CustomChores.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
 
 namespace LeFauxMatt.HelpForHire.Models
 {
@@ -50,8 +49,8 @@ namespace LeFauxMatt.HelpForHire.Models
         public virtual void DrawInMenu(SpriteBatch b, int x, int y)
         {
             b.Draw(Chore.Image,
-                new Vector2(x - Chore.Image.Width / 2, y - Chore.Image.Height / 2),
-                new Rectangle(0, 0, Chore.Image.Width, Chore.Image.Height),
+                new Vector2(x - ImageWidth / 2, y - ImageHeight / 2),
+                new Rectangle(0, 0, ImageWidth, ImageHeight),
                 Color.White);
         }
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using LeFauxMatt.CustomChores;
-using LeFauxMatt.CustomChores.Models;
 using LeFauxMatt.HelpForHire.Menus;
 using LeFauxMatt.HelpForHire.Models;
 using StardewModdingAPI;
@@ -65,7 +64,7 @@ namespace LeFauxMatt.HelpForHire
                 return;
 
             if (Game1.activeClickableMenu is null)
-                Game1.activeClickableMenu = new ChoreMenu(_customChoresApi, _chores);
+                Game1.activeClickableMenu = new ChoreMenu(_chores);
         }
 
         /****
@@ -106,7 +105,7 @@ namespace LeFauxMatt.HelpForHire
 
                     Game1.playSound("purchaseClick");
                     Game1.player.Money -= chore.Price;
-                    Monitor.Log($"Successfully performed chore {choreHandler.Key}", LogLevel.Trace);
+                    Monitor.Log($"Successfully performed chore {choreHandler.Key}");
                 }
                 catch (Exception ex)
                 {
@@ -139,7 +138,7 @@ namespace LeFauxMatt.HelpForHire
                 return;
 
             if (e.Button == _config.ShopMenuButton)
-                Game1.activeClickableMenu = new ChoreMenu(_customChoresApi, _chores);
+                Game1.activeClickableMenu = new ChoreMenu(_chores);
         }
 
         private bool UpdateChores()

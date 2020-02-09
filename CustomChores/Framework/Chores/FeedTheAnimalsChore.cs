@@ -82,7 +82,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                     if (animalHouse.doesTileHaveProperty(xTile, yTile, "Trough", "Back") == null)
                         continue;
                     var key = new Vector2(xTile, yTile);
-                    if (!animalHouse.objects.ContainsKey(key) || Game1.getFarm().piecesOfHay <= 0)
+                    if (animalHouse.objects.ContainsKey(key) || Game1.getFarm().piecesOfHay <= 0)
                         continue;
                     animalHouse.objects.Add(key, new SObject(178, 1));
                     --Game1.getFarm().piecesOfHay.Value;
