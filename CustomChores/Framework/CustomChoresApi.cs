@@ -69,10 +69,10 @@ namespace LeFauxMatt.CustomChores.Framework
 
         /// <summary>Checks if a chore can be done.</summary>
         /// <returns>True if current conditions allows chore to be done.</returns>
-        public bool CheckChore(string choreName)
+        public bool CheckChore(string choreName, bool today = true)
         {
             _chores.TryGetValue(choreName, out var chore);
-            return !(chore is null) && chore.CanDoIt();
+            return !(chore is null) && chore.CanDoIt(today);
         }
 
         /// <summary>Gets chore tokens.</summary>
