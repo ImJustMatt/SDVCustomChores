@@ -34,8 +34,8 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             var animalHouses = (
                     from building in Game1.getFarm().buildings
                     where building.daysOfConstructionLeft <= 0 &&
-                          ((_enableBarns && building is Barn) ||
-                           (_enableCoops && building is Coop))
+                          ((_enableBarns && building is Barn barn && !barn.buildingType.Contains("Deluxe")) ||
+                           (_enableCoops && building is Coop coop && !coop.buildingType.Contains("Deluxe")))
                     select building.indoors.Value)
                 .OfType<AnimalHouse>()
                 .ToList();
@@ -55,6 +55,8 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                 foreach (var key in animalHouse.Value)
                 {
                     if (Game1.getFarm().piecesOfHay <= 0)
+                        continue;
+                    if (animalHouse.Key.objects.ContainsKey(key))
                         continue;
                     animalHouse.Key.objects.Add(key, new SObject(178, 1));
                     --Game1.getFarm().piecesOfHay.Value;
@@ -88,7 +90,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         private string GetAnimalsFed() =>
             _animalsFed.ToString(CultureInfo.InvariantCulture);
         private string GetWorkNeeded() =>
-            _animalHouses.Sum(animalHouse => animalHouse.Value.Count)
+            _animalHouses.Values.Sum(animalHouse => animalHouse.Count)
                 .ToString(CultureInfo.InvariantCulture);
 
         private static IList<Vector2> GetAnimalTroughs(AnimalHouse animalHouse)
@@ -101,8 +103,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                     if (animalHouse.doesTileHaveProperty(xTile, yTile, "Trough", "Back") == null)
                         continue;
                     var key = new Vector2(xTile, yTile);
-                    if (animalHouse.objects.ContainsKey(key))
-                        continue;
                     animalTroughs.Add(key);
                     if (animalTroughs.Count >= animalHouse.animalLimit)
                         return animalTroughs;
