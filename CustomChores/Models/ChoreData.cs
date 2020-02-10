@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
 
 namespace LeFauxMatt.CustomChores.Models
 {
@@ -8,15 +7,23 @@ namespace LeFauxMatt.CustomChores.Models
     {
         public readonly string ChoreName;
         public readonly IDictionary<string, object> Config;
-        public readonly IEnumerable<Translation> Translations;
+        public readonly IEnumerable<TranslationData> Translations;
         public readonly Texture2D Image;
 
-        public ChoreData(string choreName, IDictionary<string, object> config, IEnumerable<Translation> translations, Texture2D image)
+        public ChoreData(string choreName, IDictionary<string, object> config, IEnumerable<TranslationData> translations, Texture2D image)
         {
             ChoreName = choreName;
             Config = config;
             Translations = translations;
             Image = image;
+        }
+
+        public void ClearTranslationCache()
+        {
+            foreach (var translation in Translations)
+            {
+                translation.ClearCache();
+            }
         }
     }
 }

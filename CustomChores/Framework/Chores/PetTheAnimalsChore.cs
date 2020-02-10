@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
-using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley;
 
@@ -43,17 +43,21 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             return true;
         }
 
-        public override IDictionary<string, string> GetTokens()
+        public override IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper)
         {
-            var tokens = base.GetTokens();
+            var tokens = base.GetTokens(contentHelper);
+            tokens.Add("AnimalName", GetFarmAnimalName);
+            return tokens;
+        }
+
+        public string GetFarmAnimalName()
+        {
             var farmAnimals =
                 from farmAnimal in Game1.getFarm().getAllFarmAnimals()
                 where (_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn")) ||
                       (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop"))
                 select farmAnimal;
-            if (farmAnimals.Any())
-                tokens.Add("animalName", farmAnimals.Shuffle().First().Name);
-            return tokens;
+            return farmAnimals.Any() ? farmAnimals.Shuffle().First().Name : null;
         }
     }
 }

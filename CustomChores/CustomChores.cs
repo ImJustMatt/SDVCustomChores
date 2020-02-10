@@ -19,7 +19,7 @@ namespace LeFauxMatt.CustomChores
         private readonly ChoreBuilder _choreBuilder = new ChoreBuilder();
 
         /// <summary>Instances of custom chores created by content packs.</summary>
-        private readonly IDictionary<string, IChore> _chores = new Dictionary<string, IChore>();
+        private readonly IDictionary<string, IChore> _chores = new Dictionary<string, IChore>(StringComparer.OrdinalIgnoreCase);
 
         /*********
         ** Public methods
@@ -32,7 +32,7 @@ namespace LeFauxMatt.CustomChores
             helper.ConsoleCommands.Add("chores_Do", "Performs a chore.\n\nUsage: chore_Do <value>\n- value: chore by name.", DoChore);
             helper.ConsoleCommands.Add("chores_CanDo", "Checks if a chore can be done.\n\nUsage: chore_CanDo <value>\n- value: chore by name.", CheckChore);
             helper.ConsoleCommands.Add("chores_ListAll", "Lists all chores.\n\nUsage: chore_ListAll", ListChores);
-
+            
             // hook events
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
@@ -40,7 +40,7 @@ namespace LeFauxMatt.CustomChores
 
         public override object GetApi()
         {
-            return new CustomChoresApi(Monitor, _choreBuilder, _chores);
+            return new CustomChoresApi(Helper.Content, Monitor, _choreBuilder, _chores);
         }
 
         /*********
@@ -132,7 +132,7 @@ namespace LeFauxMatt.CustomChores
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
         {
             _chores.Clear();
-
+            
             // create chore instances from content packs
             foreach (var contentPack in Helper.ContentPacks.GetOwned())
             {
@@ -141,12 +141,17 @@ namespace LeFauxMatt.CustomChores
                     Monitor.Log($"Missing chores.json from {contentPack.Manifest.UniqueID}. Skipping.", LogLevel.Warn);
                     continue;
                 }
-
+                
                 Monitor.Log($"Loading chore.json from {contentPack.Manifest.UniqueID}.", LogLevel.Trace);
+
+                var translations =
+                    from translation in contentPack.Translation.GetTranslations()
+                    select new TranslationData(translation);
+
                 var choreData = new ChoreData(
                     contentPack.Manifest.UniqueID,
                     contentPack.ReadJsonFile<IDictionary<string, object>>("chore.json"),
-                    contentPack.Translation.GetTranslations(),
+                    translations,
                     contentPack.HasFile("assets/image.png") ? contentPack.LoadAsset<Texture2D>("assets/image.png") : null);
 
                 var chore = _choreBuilder.GetChore(choreData);
@@ -157,6 +162,7 @@ namespace LeFauxMatt.CustomChores
                 }
 
                 _chores.Add(contentPack.Manifest.UniqueID, chore);
+                Monitor.Log($"Loaded chore {contentPack.Manifest.UniqueID}.", LogLevel.Debug);
             }
         }
     }

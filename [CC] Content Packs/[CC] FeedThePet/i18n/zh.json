@@ -1,4 +1,4 @@
 ﻿{
 	//默认对话（由单个字符覆盖）
-	"HelpfulSpouses.default": "早上好{{nickName}}，我把{{petName}}的水碗装满了。",
+	"Dialogue.Mod=HelpfulSpouses": "早上好{{NickName}}，我把{{PetName}}的水碗装满了。",
 }

@@ -11,6 +11,9 @@ namespace LeFauxMatt.CustomChores.Framework
         /*********
         ** Fields
         *********/
+        /// <summary>Content helper to load data assets.</summary>
+        private readonly IContentHelper _contentHelper;
+
         /// <summary>Encapsulates monitoring and logging.</summary>
         private readonly IMonitor _monitor;
 
@@ -24,11 +27,13 @@ namespace LeFauxMatt.CustomChores.Framework
         ** Public methods
         *********/
         /// <summary>Construct an instance</summary>
+        /// <param name="contentHelper">Content helper to load data assets.</param>
         /// <param name="monitor">Encapsulates monitoring and logging.</param>
         /// <param name="choreBuilders">The custom chores.</param>
         /// /// <param name="chores"></param>
-        internal CustomChoresApi(IMonitor monitor, ChoreBuilder choreBuilders, IDictionary<string, IChore> chores)
+        internal CustomChoresApi(IContentHelper contentHelper, IMonitor monitor, ChoreBuilder choreBuilders, IDictionary<string, IChore> chores)
         {
+            _contentHelper = contentHelper;
             _monitor = monitor;
             _choreBuilders = choreBuilders;
             _chores = chores;
@@ -72,10 +77,10 @@ namespace LeFauxMatt.CustomChores.Framework
 
         /// <summary>Gets chore tokens.</summary>
         /// <returns>Dictionary of chore tokens.</returns>
-        public IDictionary<string, string> GetChoreTokens(string choreName)
+        public IDictionary<string, Func<string>> GetChoreTokens(string choreName)
         {
             _chores.TryGetValue(choreName, out var chore);
-            return chore?.GetTokens();
+            return chore?.GetTokens(_contentHelper);
         }
     }
 }

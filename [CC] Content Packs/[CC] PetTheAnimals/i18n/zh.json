@@ -1,4 +1,4 @@
 ﻿{
 	//默认对话（由单个字符覆盖）
-	"HelpfulSpouses.default": "{{nickname}}早上好，我抚摸了谷仓和鸡舍中的所有动物。",
+	"Dialogue.Mod=HelpfulSpouses": "{{NickName}}早上好，我抚摸了谷仓和鸡舍中的所有动物。",
 }

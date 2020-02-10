@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using LeFauxMatt.CustomChores.Models;
 
 namespace LeFauxMatt.CustomChores
@@ -27,6 +28,6 @@ namespace LeFauxMatt.CustomChores
 
         /// <summary>Gets chore tokens.</summary>
         /// <returns>Dictionary of chore tokens.</returns>
-        IDictionary<string, string> GetChoreTokens(string choreName);
+        IDictionary<string, Func<string>> GetChoreTokens(string choreName);
     }
 }

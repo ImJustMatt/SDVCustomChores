@@ -1,5 +1,5 @@
 ﻿{
 	//默认对话（由单个字符覆盖）
-	"HelpfulSpouses.default[birthdayGender=Female]": "今天是{{npcName}}的生日！我去买了礼物送给她。[{{ItemId}}]",
-	"HelpfulSpouses.default[birthdayGender=Male]": "今天是{{npcName}}的生日！我去买了礼物送给他。[{{ItemId}}]",
+	"Dialogue.Mod=HelpfulSpouses.BirthdayGender=Female": "今天是{{Birthday}}的生日！我去买了礼物送给她。[{{ItemId}}]",
+	"Dialogue.Mod=HelpfulSpouses.BirthdayGender=Male": "今天是{{Birthday}}的生日！我去买了礼物送给他。[{{ItemId}}]",
 }

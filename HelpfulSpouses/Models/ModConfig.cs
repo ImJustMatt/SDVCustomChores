@@ -109,6 +109,14 @@ namespace LeFauxMatt.HelpfulSpouses.Models
                 { "furyx639.WaterTheSlimes", 1 },
             });
 
+            // Romanceable Rasmodius
+            Spouses.Add("Wizard", new Dictionary<string, double>()
+            {
+                { "furyx639.BirthdayGift", 0.8 },
+                { "furyx639.WaterTheCrops", 0.4 },
+                { "furyx639.WaterTheSlimes", 0.7 },
+            });
+
             // SVE Marriage Candidates (TBD)
             Spouses.Add("Olivia", new Dictionary<string, double>()
             {
@@ -122,6 +130,20 @@ namespace LeFauxMatt.HelpfulSpouses.Models
                 { "furyx639.BirthdayGift", 0.8 },
                 { "furyx639.PetTheAnimals", 0.6 },
                 { "furyx639.WaterTheCrops", 0.4 },
+            });
+
+            Spouses.Add("Paul", new Dictionary<string, double>()
+            {
+                { "furyx639.BirthdayGift", 0.8 },
+                { "furyx639.PetTheAnimals", 0.6 },
+                { "furyx639.WaterTheCrops", 0.4 },
+            });
+
+            Spouses.Add("Sophia", new Dictionary<string, double>()
+            {
+                { "furyx639.PetTheAnimals", 0.7 },
+                { "furyx639.RepairTheFences", 0.5 },
+                { "furyx639.WaterTheCrops", 0.6 },
             });
         }
     }

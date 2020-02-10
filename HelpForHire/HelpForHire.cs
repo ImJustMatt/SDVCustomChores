@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using LeFauxMatt.CustomChores;
+using LeFauxMatt.CustomChores.Models;
 using LeFauxMatt.HelpForHire.Menus;
 using LeFauxMatt.HelpForHire.Models;
 using StardewModdingAPI;
@@ -22,11 +23,12 @@ namespace LeFauxMatt.HelpForHire
         private ModConfig _config;
 
         /// <summary>A list of chores with assets and config related to the shop menu.</summary>
-        private readonly IDictionary<string, ChoreHandler> _chores = new Dictionary<string, ChoreHandler>();
+        private readonly IDictionary<string, ChoreHandler> _chores = new Dictionary<string, ChoreHandler>(StringComparer.OrdinalIgnoreCase);
 
         internal static string PurchasedLabel;
         internal static string NotPurchasedLabel;
         internal static string InsufficientFundsLabel;
+        internal static string TotalCosts;
 
         /*********
         ** Public methods
@@ -40,13 +42,13 @@ namespace LeFauxMatt.HelpForHire
             PurchasedLabel = helper.Translation.Get("label.purchased");
             NotPurchasedLabel = helper.Translation.Get("label.notPurchased");
             InsufficientFundsLabel = helper.Translation.Get("label.insufficientFunds");
+            TotalCosts = helper.Translation.Get("label.totalCosts");
 
             // add console commands
             helper.ConsoleCommands.Add("chores_OpenShop", "Opens the chores shop.\n\nUsage: chores_OpenShop", OpenShop);
 
             // hook events
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
-            helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
         }
@@ -59,7 +61,10 @@ namespace LeFauxMatt.HelpForHire
         /// <param name="args">The arguments received by the command. Each word after the command name is a separate argument.</param>
         private void OpenShop(string command, string[] args)
         {
-            if (_chores.Any() && Game1.activeClickableMenu is null)
+            if (!_chores.Any() && !UpdateChores())
+                return;
+
+            if (Game1.activeClickableMenu is null)
                 Game1.activeClickableMenu = new ChoreMenu(_customChoresApi, _chores);
         }
 
@@ -74,34 +79,13 @@ namespace LeFauxMatt.HelpForHire
             // init
             _customChoresApi = Helper.ModRegistry.GetApi<ICustomChoresApi>("furyx639.CustomChores");
         }
-        
-        /// <summary>The event called after a save slot is loaded.</summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="e">The event arguments.</param>
-        private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
-        {
-            _customChoresApi = Helper.ModRegistry.GetApi<ICustomChoresApi>("furyx639.CustomChores");
-
-            // get chores
-            var choreKeys =
-                from choreKey in _customChoresApi.GetChores()
-                where _config.Chores.ContainsKey(choreKey)
-                select choreKey;
-
-            foreach (var choreKey in choreKeys)
-            {
-                var chore = _customChoresApi.GetChore(choreKey);
-                _config.Chores.TryGetValue(choreKey, out var price);
-                _chores.Add(choreKey, new ChoreHandler(chore, price));
-            }
-        }
 
         /// <summary>The method invoked when a new day starts.</summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event data.</param>
         private void OnDayStarted(object sender, DayStartedEventArgs e)
         {
-            bool insufficientFunds = false;
+            var insufficientFunds = false;
             foreach (var choreHandler in _chores)
             {
                 var chore = choreHandler.Value;
@@ -148,12 +132,34 @@ namespace LeFauxMatt.HelpForHire
         /// <param name="e">The event arguments.</param>
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (!Context.IsPlayerFree || !_chores.Any() || !(Game1.activeClickableMenu is null))
+            if (!Context.IsPlayerFree || !(Game1.activeClickableMenu is null))
                 return;
 
-            var key = e.Button;
-            if (key == _config.ShopMenuButton)
+            if (!_chores.Any() && !UpdateChores())
+                return;
+
+            if (e.Button == _config.ShopMenuButton)
                 Game1.activeClickableMenu = new ChoreMenu(_customChoresApi, _chores);
+        }
+
+        private bool UpdateChores()
+        {
+            _customChoresApi = Helper.ModRegistry.GetApi<ICustomChoresApi>("furyx639.CustomChores");
+
+            // get chores
+            var choreKeys =
+                from choreKey in _customChoresApi.GetChores()
+                where _config.Chores.ContainsKey(choreKey)
+                select choreKey;
+
+            foreach (var choreKey in choreKeys)
+            {
+                var chore = _customChoresApi.GetChore(choreKey);
+                _config.Chores.TryGetValue(choreKey, out var price);
+                _chores.Add(choreKey, new ChoreHandler(chore, price, _customChoresApi));
+            }
+
+            return _chores.Any();
         }
     }
 }
