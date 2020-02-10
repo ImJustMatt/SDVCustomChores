@@ -1,9 +1,9 @@
 ﻿{
-	"Name": "FeedTheAnimals",
+	"Name": "LoveThePets",
 	"Author": "furyx639",
 	"Version": "1.2.0",
-	"Description": "Custom Chore for feeding all barn and coop animals.",
-	"UniqueID": "furyx639.FeedTheAnimals",
+	"Description": "Custom Chore for petting and feeding your pets.",
+	"UniqueID": "furyx639.LoveThePets",
 	"ContentPackFor": {
 		"UniqueID":  "furyx639.CustomChores",
 		"MinimumApiVersion":  "1.2.0"

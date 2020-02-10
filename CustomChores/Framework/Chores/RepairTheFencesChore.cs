@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
 using StardewValley;
@@ -8,10 +10,11 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class RepairTheFencesChore : BaseChore
     {
-        private IEnumerable<Fence> _fences;
+        private IList<Fence> _fences;
         private readonly bool _enableFarm;
         private readonly bool _enableBuildings;
         private readonly bool _enableOutdoors;
+        private int _fencesRepaired;
 
         public RepairTheFencesChore(ChoreData choreData) : base(choreData)
         {
@@ -24,8 +27,10 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _enableOutdoors = !(enableOutdoors is bool b3) || b3;
         }
 
-        public override bool CanDoIt()
+        public override bool CanDoIt(bool today = true)
         {
+            _fencesRepaired = 0;
+
             var locations =
                 from location in Game1.locations
                 where (_enableFarm && location.IsFarm) ||
@@ -39,7 +44,10 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                     where building.indoors.Value != null
                     select building.indoors.Value);
             
-            _fences = locations.SelectMany(location => location.objects.Values).OfType<Fence>();
+            _fences = locations
+                .SelectMany(location => location.objects.Values)
+                .OfType<Fence>()
+                .ToList();
             
             return _fences.Any();
         }
@@ -48,10 +56,28 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         {
             foreach (var fence in _fences)
             {
+                if (fence.getHealth() >= fence.maxHealth.Value)
+                    continue;
                 fence.repair();
+                ++_fencesRepaired;
             }
 
             return true;
         }
+
+        public override IDictionary<string, Func<string>> GetTokens()
+        {
+            var tokens = base.GetTokens();
+            tokens.Add("FencesRepaired", GetFencesRepaired);
+            tokens.Add("WorkDone", GetFencesRepaired);
+            tokens.Add("WorkNeeded", GetWorkNeeded);
+            return tokens;
+        }
+
+        private string GetFencesRepaired() =>
+            _fencesRepaired.ToString(CultureInfo.InvariantCulture);
+
+        private string GetWorkNeeded() =>
+            _fences.Count.ToString(CultureInfo.InvariantCulture);
     }
 }

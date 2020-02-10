@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using LeFauxMatt.CustomChores;
-using LeFauxMatt.CustomChores.Models;
 using LeFauxMatt.HelpForHire.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -17,8 +14,6 @@ namespace LeFauxMatt.HelpForHire.Menus
         /*********
         ** Fields
         *********/
-        private readonly ICustomChoresApi _customChoresApi;
-
         /// <summary>A list of chores with assets and config related to the shop menu.</summary>
         private readonly IDictionary<string, ChoreHandler> _chores;
 
@@ -26,7 +21,7 @@ namespace LeFauxMatt.HelpForHire.Menus
         private readonly IList<string> _choreKeys;
         
         /// <summary>The index of the current chore selected.</summary>
-        private int _currentChoreIndex = 0;
+        private int _currentChoreIndex;
         
         /// <summary>Returns the current chore object.</summary>
         internal ChoreHandler CurrentChore => _chores[_choreKeys[_currentChoreIndex]];
@@ -35,7 +30,7 @@ namespace LeFauxMatt.HelpForHire.Menus
         internal int TotalCosts =>
             _chores.Values
                 .Where(chore => chore.IsPurchased)
-                .Sum(chore => chore.Price);
+                .Sum(chore => chore.EstimatedCost);
         private static int MaxWidthOfImage { get; } = 384;
         private static int MaxHeightOfImage { get; } = 384;
         private static int MaxWidthOfDescription { get; } = 512;
@@ -47,9 +42,8 @@ namespace LeFauxMatt.HelpForHire.Menus
         /*********
         ** Public methods
         *********/
-        public ChoreMenu(ICustomChoresApi customChoresApi, IDictionary<string, ChoreHandler> chores)
+        public ChoreMenu(IDictionary<string, ChoreHandler> chores)
         {
-            _customChoresApi = customChoresApi;
             _chores = chores;
 
             // create ordered list
@@ -58,6 +52,12 @@ namespace LeFauxMatt.HelpForHire.Menus
                 orderby chore.DisplayName
                 select chore.ChoreName).ToList();
 
+            // force chore estimates to be updated
+            foreach (var chore in chores.Values)
+            {
+                HelpForHireMod.CustomChoresApi.CheckChore(chore.ChoreName, false);
+            }
+
             ResetBounds();
         }
 
@@ -65,7 +65,7 @@ namespace LeFauxMatt.HelpForHire.Menus
         {
             _backButton.tryHover(x, y, 1f);
             _forwardButton.tryHover(x, y, 1f);
-            _okButton.tryHover(x, y, 0.1f);
+            _okButton.tryHover(x, y);
         }
 
         public override void gameWindowSizeChanged(Rectangle oldBounds, Rectangle newBounds)
@@ -104,11 +104,8 @@ namespace LeFauxMatt.HelpForHire.Menus
         {
             base.draw(b);
 
-            var tokens = _customChoresApi.GetChoreTokens(CurrentChore.ChoreName);
-            CurrentChore.ClearTranslationCache();
-
             // Chore Preview
-            IClickableMenu.drawTextureBox(b,
+            drawTextureBox(b,
                 xPositionOnScreen,
                 yPositionOnScreen,
                 MaxWidthOfImage + spaceToClearSideBorder * 2,
@@ -124,11 +121,10 @@ namespace LeFauxMatt.HelpForHire.Menus
                 CurrentChore.DisplayName,
                 xPositionOnScreen + MaxWidthOfImage + MaxWidthOfDescription / 2 + 60,
                 yPositionOnScreen,
-                MaxWidthOfDescription - 64,
-                1f, -1, 0, 0.88f, false);
+                MaxWidthOfDescription - 64);
 
             // Chore Description
-            IClickableMenu.drawTextureBox(b,
+            drawTextureBox(b,
                 xPositionOnScreen + MaxWidthOfImage + spaceToClearSideBorder * 2 + 16,
                 yPositionOnScreen + 80,
                 MaxWidthOfDescription + spaceToClearSideBorder * 2,
@@ -140,14 +136,13 @@ namespace LeFauxMatt.HelpForHire.Menus
                 Game1.dialogueFont,
                 new Vector2(xPositionOnScreen + MaxWidthOfImage + spaceToClearSideBorder * 3 + 16, yPositionOnScreen + spaceToClearSideBorder + 80),
                 Game1.textColor,
-                1f, -1f, -1, -1, 0.75f, 3);
+                1f, -1f, -1, -1, 0.75f);
 
             // Chore Cost
             SpriteText.drawString(b,
                 "$",
                 xPositionOnScreen + MaxWidthOfImage + spaceToClearSideBorder * 3 + 32,
-                yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 64,
-                999999, -1, 999999, 1f, 0.88f, false, -1, "", -1, SpriteText.ScrollTextAlignment.Left);
+                yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 64);
 
             Utility.drawTextWithShadow(b,
                 Game1.content.LoadString("Strings\\StringsFromCSFiles:LoadGameMenu.cs.11020", CurrentChore.Price),
@@ -155,30 +150,30 @@ namespace LeFauxMatt.HelpForHire.Menus
                 new Vector2(xPositionOnScreen + MaxWidthOfImage + spaceToClearSideBorder * 3 + 100,
                     yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 64),
                 Game1.player.Money >= CurrentChore.Price ? Game1.textColor : Color.Red,
-                1f, -1f, -1, -1, 0.25f, 3);
+                1f, -1f, -1, -1, 0.25f);
 
             // Purchased Status
             Utility.drawTextWithShadow(b,
-                CurrentChore.IsPurchased ? HelpForHire.PurchasedLabel : HelpForHire.NotPurchasedLabel,
+                CurrentChore.IsPurchased ? HelpForHireMod.PurchasedLabel : HelpForHireMod.NotPurchasedLabel,
                 Game1.dialogueFont,
                 new Vector2(xPositionOnScreen + MaxWidthOfImage + MaxWidthOfDescription / 2 + spaceToClearSideBorder * 3,
                     yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 64),
                 CurrentChore.IsPurchased ? Game1.textColor : Color.Red,
-                1f, -1f, -1, -1, 0.25f, 3);
+                1f, -1f, -1, -1, 0.25f);
             
             // Total Costs of Purchased Chores
             Utility.drawTextWithShadow(b,
-                HelpForHire.TotalCosts + ": " +
-                    Game1.content.LoadString("Strings\\StringsFromCSFiles:LoadGameMenu.cs.11020", TotalCosts),
-            Game1.dialogueFont,
+                HelpForHireMod.TotalCosts + ": " +
+                Game1.content.LoadString("Strings\\StringsFromCSFiles:LoadGameMenu.cs.11020", TotalCosts),
+                Game1.dialogueFont,
                 new Vector2(xPositionOnScreen + MaxWidthOfImage + spaceToClearSideBorder * 3 + 32,
                     yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 16),
                 Game1.textColor,
-                1f, -1f, -1, -1, 0.25f, 3);
+                1f, -1f, -1, -1, 0.25f);
 
             _backButton.draw(b);
             _forwardButton.draw(b);
-            _okButton.draw(b, !CurrentChore.IsPurchased ? Color.White : Color.Gray * 0.8f, 0.88f, 0);
+            _okButton.draw(b, !CurrentChore.IsPurchased ? Color.White : Color.Gray * 0.8f, 0.88f);
 
             drawMouse(b);
         }
@@ -205,8 +200,7 @@ namespace LeFauxMatt.HelpForHire.Menus
                     new Rectangle(xPositionOnScreen + MaxWidthOfImage / 2 + spaceToClearSideBorder - 96, yPositionOnScreen + MaxHeightOfImage + spaceToClearSideBorder * 2 + 32, 48, 44),
                     Game1.mouseCursors,
                     new Rectangle(352, 495, 12, 11),
-                    4f,
-                    false)
+                    4f)
                 { myID = 101, rightNeighborID = 102 };
 
             // Forward Button
@@ -214,8 +208,7 @@ namespace LeFauxMatt.HelpForHire.Menus
                     new Rectangle(xPositionOnScreen + MaxWidthOfImage / 2 + spaceToClearSideBorder + 32, yPositionOnScreen + MaxHeightOfImage + spaceToClearSideBorder * 2 + 32, 48, 44),
                     Game1.mouseCursors,
                     new Rectangle(365, 495, 12, 11),
-                    4f,
-                    false)
+                    4f)
                 { myID = 102, leftNeighborID = 101 };
 
             // OK Button
@@ -223,8 +216,7 @@ namespace LeFauxMatt.HelpForHire.Menus
                     new Rectangle(xPositionOnScreen + MaxWidthOfImage + MaxWidthOfDescription + spaceToClearSideBorder * 4 - 48, yPositionOnScreen + MaxHeightOfImage + spaceToClearSideBorder * 2 + 32, 64, 64),
                     Game1.mouseCursors,
                     new Rectangle(280, 411, 16, 16),
-                    4f,
-                    false)
+                    4f)
                 { myID = 106 };
         }
     }

@@ -15,6 +15,6 @@
     "Dialogue.Mod=HelpfulSpouses": "Good morning {{NickName}}, I filled {{PetName}}'s water bowl.",
 
 	// Shop text
-	"DisplayName.Mod=HelpForHire":  "Feed the Pet",
+	"DisplayName.Mod=HelpForHire":  "Love the Pets",
 	"Description.Mod=HelpForHire":  "Let us provide the best of care for your little {{PetName}}.",
 }

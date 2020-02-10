@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using LeFauxMatt.CustomChores.Models;
-using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
 
 namespace LeFauxMatt.CustomChores
 {
@@ -14,12 +12,13 @@ namespace LeFauxMatt.CustomChores
         ** Public methods
         *********/
         /// <summary>Returns true if chore can be performed based on the current days conditions.</summary>
-        bool CanDoIt();
+        /// <param name="today">Check eligibility based today's conditions.</param>
+        bool CanDoIt(bool today = true);
 
         /// <summary>Performs the chore and returns true/false on success or failure.</summary>
         bool DoIt();
 
         /// <summary>Returns tokens for substitution.</summary>
-        IDictionary<string, Func<string>> GetTokens(IContentHelper contentHelper);
+        IDictionary<string, Func<string>> GetTokens();
     }
 }

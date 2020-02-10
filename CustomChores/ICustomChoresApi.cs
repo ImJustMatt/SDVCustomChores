@@ -24,7 +24,7 @@ namespace LeFauxMatt.CustomChores
 
         /// <summary>Checks if a chore can be done.</summary>
         /// <returns>True if current conditions allows chore to be done.</returns>
-        bool CheckChore(string choreName);
+        bool CheckChore(string choreName, bool today = true);
 
         /// <summary>Gets chore tokens.</summary>
         /// <returns>Dictionary of chore tokens.</returns>

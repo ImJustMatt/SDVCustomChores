@@ -10,8 +10,10 @@ using StardewModdingAPI.Events;
 namespace LeFauxMatt.CustomChores
 {
     /// <summary>The mod entry point.</summary>
-    public class CustomChores : Mod
+    public class CustomChoresMod : Mod
     {
+        public static CustomChoresMod Instance { get; private set; }
+
         /*********
         ** Fields
         *********/
@@ -28,19 +30,22 @@ namespace LeFauxMatt.CustomChores
         /// <param name="helper">Provides methods for interacting with the mod directory, such as read/writing a config file or custom JSON files.</param>
         public override void Entry(IModHelper helper)
         {
+            // init
+            Instance = this;
+
             // add console commands
-            helper.ConsoleCommands.Add("chores_Do", "Performs a chore.\n\nUsage: chore_Do <value>\n- value: chore by name.", DoChore);
-            helper.ConsoleCommands.Add("chores_CanDo", "Checks if a chore can be done.\n\nUsage: chore_CanDo <value>\n- value: chore by name.", CheckChore);
-            helper.ConsoleCommands.Add("chores_ListAll", "Lists all chores.\n\nUsage: chore_ListAll", ListChores);
+            Helper.ConsoleCommands.Add("chores_Do", "Performs a chore.\n\nUsage: chore_Do <value>\n- value: chore by name.", DoChore);
+            Helper.ConsoleCommands.Add("chores_CanDo", "Checks if a chore can be done.\n\nUsage: chore_CanDo <value>\n- value: chore by name.", CheckChore);
+            Helper.ConsoleCommands.Add("chores_ListAll", "Lists all chores.\n\nUsage: chore_ListAll", ListChores);
             
             // hook events
-            helper.Events.GameLoop.GameLaunched += OnGameLaunched;
-            helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
+            Helper.Events.GameLoop.GameLaunched += OnGameLaunched;
+            Helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
         }
 
         public override object GetApi()
         {
-            return new CustomChoresApi(Helper.Content, Monitor, _choreBuilder, _chores);
+            return new CustomChoresApi(_choreBuilder, _chores);
         }
 
         /*********
@@ -104,7 +109,6 @@ namespace LeFauxMatt.CustomChores
         /// <param name="args">The arguments received by the command. Each word after the command name is a separate argument.</param>
         private void ListChores(string command, string[] args)
         {
-            Monitor.Log($"All Chores:", LogLevel.Info);
             foreach (var chore in _chores)
             {
                 Monitor.Log($"- {chore.Key}", LogLevel.Info);
@@ -142,11 +146,11 @@ namespace LeFauxMatt.CustomChores
                     continue;
                 }
                 
-                Monitor.Log($"Loading chore.json from {contentPack.Manifest.UniqueID}.", LogLevel.Trace);
+                Monitor.Log($"Loading chore.json from {contentPack.Manifest.UniqueID}.");
 
-                var translations =
+                var translations = (
                     from translation in contentPack.Translation.GetTranslations()
-                    select new TranslationData(translation);
+                    select new TranslationData(translation)).ToList();
 
                 var choreData = new ChoreData(
                     contentPack.Manifest.UniqueID,

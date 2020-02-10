@@ -2,8 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
-using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
 
 namespace LeFauxMatt.CustomChores.Framework
 {
