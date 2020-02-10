@@ -6,13 +6,6 @@ namespace LeFauxMatt.HelpfulSpouses
 {
     internal class NpcPatches
     {
-        private static IMonitor _monitor;
-
-        public static void Initialize(IMonitor monitor)
-        {
-            _monitor = monitor;
-        }
-
         public static void MarriageDuties_Prefix()
         {
             try
@@ -25,7 +18,8 @@ namespace LeFauxMatt.HelpfulSpouses
             }
             catch (Exception ex)
             {
-                _monitor.Log($"Failed in {nameof(MarriageDuties_Prefix)}:\n{ex}", LogLevel.Error);
+                HelpfulSpousesMod.Instance.Monitor.Log($"Failed in {nameof(MarriageDuties_Prefix)}:\n{ex}", LogLevel.Error);
+                throw;
             }
         }
     }

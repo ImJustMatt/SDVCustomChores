@@ -32,7 +32,9 @@ namespace LeFauxMatt.CustomChores.Framework
         /// <param name="factory">A factory which creates an instance of a chore type.</param>
         public void AddChoreFactory(IChoreFactory factory)
         {
-            CustomChores.Instance.Monitor.Log($"Adding chore factory: {factory.GetType().AssemblyQualifiedName}");
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+            CustomChoresMod.Instance.Monitor.Log($"Adding chore factory: {factory.GetType().AssemblyQualifiedName}");
             _choreBuilders.AddChoreFactory(factory);
         }
 

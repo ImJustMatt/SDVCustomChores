@@ -30,7 +30,7 @@ namespace LeFauxMatt.HelpForHire.Menus
         internal int TotalCosts =>
             _chores.Values
                 .Where(chore => chore.IsPurchased)
-                .Sum(chore => chore.Price);
+                .Sum(chore => chore.EstimatedCost);
         private static int MaxWidthOfImage { get; } = 384;
         private static int MaxHeightOfImage { get; } = 384;
         private static int MaxWidthOfDescription { get; } = 512;
@@ -51,6 +51,12 @@ namespace LeFauxMatt.HelpForHire.Menus
                 from chore in _chores.Values
                 orderby chore.DisplayName
                 select chore.ChoreName).ToList();
+
+            // force chore estimates to be updated
+            foreach (var chore in chores.Values)
+            {
+                HelpForHireMod.CustomChoresApi.CheckChore(chore.ChoreName, false);
+            }
 
             ResetBounds();
         }
@@ -97,8 +103,6 @@ namespace LeFauxMatt.HelpForHire.Menus
         public override void draw(SpriteBatch b)
         {
             base.draw(b);
-
-            CurrentChore.ClearTranslationCache();
 
             // Chore Preview
             drawTextureBox(b,
@@ -150,7 +154,7 @@ namespace LeFauxMatt.HelpForHire.Menus
 
             // Purchased Status
             Utility.drawTextWithShadow(b,
-                CurrentChore.IsPurchased ? HelpForHire.PurchasedLabel : HelpForHire.NotPurchasedLabel,
+                CurrentChore.IsPurchased ? HelpForHireMod.PurchasedLabel : HelpForHireMod.NotPurchasedLabel,
                 Game1.dialogueFont,
                 new Vector2(xPositionOnScreen + MaxWidthOfImage + MaxWidthOfDescription / 2 + spaceToClearSideBorder * 3,
                     yPositionOnScreen + MaxHeightOfImage - spaceToClearSideBorder - 64),
@@ -159,7 +163,7 @@ namespace LeFauxMatt.HelpForHire.Menus
             
             // Total Costs of Purchased Chores
             Utility.drawTextWithShadow(b,
-                HelpForHire.TotalCosts + ": " +
+                HelpForHireMod.TotalCosts + ": " +
                 Game1.content.LoadString("Strings\\StringsFromCSFiles:LoadGameMenu.cs.11020", TotalCosts),
                 Game1.dialogueFont,
                 new Vector2(xPositionOnScreen + MaxWidthOfImage + spaceToClearSideBorder * 3 + 32,

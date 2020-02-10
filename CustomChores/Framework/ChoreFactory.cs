@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using LeFauxMatt.CustomChores.Framework.Chores;
 using LeFauxMatt.CustomChores.Models;
-using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
 
 namespace LeFauxMatt.CustomChores.Framework
 {
@@ -18,8 +15,8 @@ namespace LeFauxMatt.CustomChores.Framework
             var choreType = (string) choreTypeObject;
             if (choreType.Equals("FeedTheAnimals", StringComparison.CurrentCultureIgnoreCase))
                 return new FeedTheAnimalsChore(choreData);
-            if (choreType.Equals("FeedThePet", StringComparison.CurrentCultureIgnoreCase))
-                return new FeedThePetChore(choreData);
+            if (choreType.Equals("LoveThePets", StringComparison.CurrentCultureIgnoreCase))
+                return new LoveThePetsChore(choreData);
             if (choreType.Equals("GiveAGift", StringComparison.CurrentCultureIgnoreCase))
                 return new GiveAGiftChore(choreData);
             if (choreType.Equals("PetTheAnimals", StringComparison.CurrentCultureIgnoreCase))
