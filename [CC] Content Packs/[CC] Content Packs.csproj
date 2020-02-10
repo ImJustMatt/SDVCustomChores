@@ -7,7 +7,7 @@
     <ProjectGuid>{484C00A4-BC14-444A-AB7E-0628F0B42220}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LeFauxMatt.CustomChores</RootNamespace>
+    <RootNamespace>LeFauxMatt.CustomChoresPack</RootNamespace>
     <AssemblyName>CustomChores</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -60,10 +60,10 @@
     <None Include="[CC] BirthdayGift\chore.json" />
     <None Include="[CC] BirthdayGift\i18n\default.json" />
     <None Include="[CC] BirthdayGift\manifest.json" />
-    <None Include="[CC] FeedThePet\chore.json" />
-    <None Include="[CC] FeedThePet\i18n\default.json" />
-    <None Include="[CC] FeedThePet\i18n\zh.json" />
-    <None Include="[CC] FeedThePet\manifest.json" />
+    <None Include="[CC] LoveThePets\chore.json" />
+    <None Include="[CC] LoveThePets\i18n\default.json" />
+    <None Include="[CC] LoveThePets\i18n\zh.json" />
+    <None Include="[CC] LoveThePets\manifest.json" />
     <None Include="[CC] FeedTheAnimals\manifest.json" />
     <None Include="[CC] FeedTheAnimals\chore.json" />
     <None Include="[CC] FeedTheAnimals\i18n\default.json" />
@@ -91,7 +91,7 @@
   <ItemGroup>
     <Content Include="[CC] BirthdayGift\assets\image.png" />
     <Content Include="[CC] FeedTheAnimals\assets\image.png" />
-    <Content Include="[CC] FeedThePet\assets\image.png" />
+    <Content Include="[CC] LoveThePets\assets\image.png" />
     <Content Include="[CC] MakeBreakfast\assets\image.png" />
     <Content Include="[CC] PetTheAnimals\assets\image.png" />
     <Content Include="[CC] RepairTheFences\assets\image.png" />
