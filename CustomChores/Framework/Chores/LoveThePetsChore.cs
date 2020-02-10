@@ -28,24 +28,16 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         {
             _petsPetted = 0;
             _pets.Clear();
-
-            if (Game1.player.getPet() == null)
-                return false;
-
-            if (today && (Game1.isRaining || Game1.getFarm().petBowlWatered.Value))
-                return false;
-
-            if (!today && (Game1.weatherForTomorrow == 1 || Game1.weatherForTomorrow == 3))
-                return false;
-
-            _pets = Game1.getFarm().characters.OfType<Pet>().ToList();
+            _pets = Game1.getFarm().characters
+                .OfType<Pet>()
+                .ToList();
 
             return _pets.Any();
         }
 
         public override bool DoIt()
         {
-            if (_fillWaterBowl)
+            if (_fillWaterBowl && !Game1.isRaining && !Game1.getFarm().petBowlWatered.Value)
             {
                 Game1.getFarm().petBowlWatered.Set(true);
             }
