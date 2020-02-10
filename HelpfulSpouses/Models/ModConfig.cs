@@ -14,14 +14,16 @@ namespace LeFauxMatt.HelpfulSpouses.Models
         public double GlobalChance { get; set; } = 1;
 
         /// <summary>The spouses that will be able to perform chores.</summary>
-        public IDictionary<string, IDictionary<string, double>> Spouses { get; set; } = new Dictionary<string, IDictionary<string, double>>();
+        public IDictionary<string, IDictionary<string, double>> Spouses { get; } = new Dictionary<string, IDictionary<string, double>>();
 
         public ModConfig()
         {
+            Instance = this;
+
             // Default Marriage Candidates (and Krobus)
             Spouses.Add("Alex", new Dictionary<string, double>()
             {
-                { "furyx639.FeedThePet", 1 },
+                { "furyx639.LoveThePets", 1 },
                 { "furyx639.FeedTheAnimals", 0.6 },
                 { "furyx639.PetTheAnimals", 0.6 },
             });
@@ -35,7 +37,7 @@ namespace LeFauxMatt.HelpfulSpouses.Models
 
             Spouses.Add("Harvey", new Dictionary<string, double>()
             {
-                { "furyx639.FeedThePet", 0.8 },
+                { "furyx639.LoveThePets", 0.8 },
                 { "furyx639.WaterTheCrops", 0.6 },
                 { "furyx639.WaterTheSlimes", 0.6 },
             });
@@ -43,21 +45,21 @@ namespace LeFauxMatt.HelpfulSpouses.Models
             Spouses.Add("Sam", new Dictionary<string, double>()
             {
                 { "furyx639.BirthdayGift", 0.4 },
-                { "furyx639.FeedThePet", 0.6 },
+                { "furyx639.LoveThePets", 0.6 },
                 { "furyx639.PetTheAnimals", 0.5 },
             });
 
             Spouses.Add("Sebastian", new Dictionary<string, double>()
             {
                 { "furyx639.BirthdayGift", 0.4 },
-                { "furyx639.FeedThePet", 0.6 },
+                { "furyx639.LoveThePets", 0.6 },
                 { "furyx639.WaterTheSlimes", 0.6 },
                 });
 
             Spouses.Add("Shane", new Dictionary<string, double>()
             {
                 { "furyx639.FeedTheAnimals", 0.8 },
-                { "furyx639.FeedThePet", 1 },
+                { "furyx639.LoveThePets", 1 },
                 { "furyx639.PetTheAnimals", 0.8 },
             });
 
@@ -98,7 +100,7 @@ namespace LeFauxMatt.HelpfulSpouses.Models
 
             Spouses.Add("Penny", new Dictionary<string, double>()
             {
-                { "furyx639.FeedThePet", 0.9 },
+                { "furyx639.LoveThePets", 0.9 },
                 { "furyx639.MakeBreakfast", 0.7 },
                 { "furyx639.PetTheAnimals", 0.8 },
             });
@@ -146,5 +148,7 @@ namespace LeFauxMatt.HelpfulSpouses.Models
                 { "furyx639.WaterTheCrops", 0.6 },
             });
         }
+
+        public static ModConfig Instance { get; private set; }
     }
 }
