@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using StardewModdingAPI;
 
 namespace LeFauxMatt.HelpForHire.Models
@@ -10,7 +9,7 @@ namespace LeFauxMatt.HelpForHire.Models
         public bool PayPerUnit { get; set; } = true;
 
         /// <summary>The chores that will be available for purchase.</summary>
-        public IDictionary<string, int> Chores { get; set; } = new Dictionary<string, int>();
+        public IDictionary<string, int> Chores { get; } = new Dictionary<string, int>();
 
         /// <summary>The button used to activate the shop menu.</summary>
         public SButton ShopMenuButton { get; set; } = SButton.P;
@@ -20,7 +19,7 @@ namespace LeFauxMatt.HelpForHire.Models
             Instance = this;
 
             Chores.Add("furyx639.FeedTheAnimals", 25);
-            Chores.Add("furyx639.FeedThePet", 250);
+            Chores.Add("furyx639.LoveThePets", 250);
             Chores.Add("furyx639.PetTheAnimals", 50);
             Chores.Add("furyx639.RepairTheFences", 10);
             Chores.Add("furyx639.WaterTheCrops", 10);
