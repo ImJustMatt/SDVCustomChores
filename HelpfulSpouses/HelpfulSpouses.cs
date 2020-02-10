@@ -1,25 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
+using System.Net;
 using Harmony;
 using LeFauxMatt.CustomChores;
 using LeFauxMatt.CustomChores.Models;
+using LeFauxMatt.HelpfulSpouses.Models;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
-using ModConfig = LeFauxMatt.HelpfulSpouses.Models.ModConfig;
 
 namespace LeFauxMatt.HelpfulSpouses
 {
-    public class HelpfulSpousesMod : Mod
+    public class HelpfulSpouses : Mod
     {
-        internal static HelpfulSpousesMod Instance { get; private set; }
-        internal static ICustomChoresApi CustomChoresApi;
-
         /*********
         ** Fields
         *********/
+        private ICustomChoresApi _customChoresApi;
+
+        /// <summary>The mod configuration.</summary>
+        private ModConfig _config;
+
         /// <summary>A list of chores and enumerable dialogue.</summary>
         private readonly IDictionary<string, ChoreData> _chores = new Dictionary<string, ChoreData>(StringComparer.OrdinalIgnoreCase);
 
@@ -31,15 +33,14 @@ namespace LeFauxMatt.HelpfulSpouses
         public override void Entry(IModHelper helper)
         {
             // init
-            Instance = this;
-            Helper.ReadConfig<ModConfig>();
+            _config = Helper.ReadConfig<ModConfig>();
 
             // add console commands
-            Helper.ConsoleCommands.Add("spouse_AddChore", "Makes spouse perform a chore.\n\nUsage: spouse_AddChore <value>\n- value: chore by name.", AddChore);
+            helper.ConsoleCommands.Add("spouse_AddChore", "Makes spouse perform a chore.\n\nUsage: spouse_AddChore <value>\n- value: chore by name.", AddChore);
 
             // hook events
-            Helper.Events.GameLoop.GameLaunched += OnGameLaunched;
-            Helper.Events.GameLoop.DayStarted += OnDayStarted;
+            helper.Events.GameLoop.GameLaunched += OnGameLaunched;
+            helper.Events.GameLoop.DayStarted += OnDayStarted;
         }
 
         /*********
@@ -67,14 +68,14 @@ namespace LeFauxMatt.HelpfulSpouses
             }
 
             // Check Chore
-            if (!CustomChoresApi.CheckChore(chore.ChoreName))
+            if (!_customChoresApi.CheckChore(chore.ChoreName))
             {
                 Monitor.Log($"Cannot perform chore {args[0]}", LogLevel.Alert);
                 return;
             }
 
             // Try Chore
-            if (!CustomChoresApi.DoChore(chore.ChoreName))
+            if (!_customChoresApi.DoChore(chore.ChoreName))
             {
                 Monitor.Log($"Failed to perform chore {args[0]}", LogLevel.Alert);
                 return;
@@ -83,36 +84,36 @@ namespace LeFauxMatt.HelpfulSpouses
             Monitor.Log($"Successfully performed chore {args[0]}", LogLevel.Info);
 
             // Add Dialogue
-            var tokens = CustomChoresApi.GetChoreTokens(chore.ChoreName);
-            tokens.Add("Mod", () => "HelpfulSpousesMod");
+            var tokens = _customChoresApi.GetChoreTokens(chore.ChoreName);
+            tokens.Add("Mod", () => "HelpfulSpouses");
             tokens.Add("Priority", () => "");
 
-            IList<TranslationData> dialogue = null;
+            IEnumerable<TranslationData> dialogue = null;
+            chore.ClearTranslationCache();
 
             // Get Prioritized Dialogue
             for (var priority = 1; priority <= 3; ++priority)
             {
                 // Dialogue by order of priority
                 tokens["Priority"] = priority.ToString;
-                dialogue = (
+                dialogue =
                     from translation in chore.Translations
                     where translation.Key.Equals("Dialogue", StringComparison.CurrentCultureIgnoreCase)
                           && translation.Filter(tokens)
                           && translation.HasSelector("Priority")
-                    select translation).ToList();
-                if (dialogue.Any())
-                    break;
+                    select translation;
+                if (dialogue.Any()) break;
             }
 
             // Get Default Dialogue
-            if (dialogue == null || !dialogue.Any())
+            if (!dialogue.Any())
             {
                 tokens.Remove("Priority");
-                dialogue = (
+                dialogue =
                     from translation in chore.Translations
                     where translation.Key.Equals("Dialogue", StringComparison.CurrentCultureIgnoreCase)
                           && translation.Filter(tokens)
-                    select translation).ToList();
+                    select translation;
             }
 
             var dialogueText = dialogue.Shuffle().First().Tokens(tokens);
@@ -132,7 +133,7 @@ namespace LeFauxMatt.HelpfulSpouses
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             // init
-            CustomChoresApi = Helper.ModRegistry.GetApi<ICustomChoresApi>("furyx639.CustomChores");
+            _customChoresApi = Helper.ModRegistry.GetApi<ICustomChoresApi>("furyx639.CustomChores");
 
             // harmony patches to prevent default chores
             var harmony = HarmonyInstance.Create("furyx639.MarriageDutiesMod");
@@ -152,7 +153,7 @@ namespace LeFauxMatt.HelpfulSpouses
                                (int)Game1.uniqueIDForThisGame / 2 +
                                (int)Game1.player.UniqueMultiplayerID);
 
-            if (Game1.timeOfDay != 600 || !Game1.player.isMarried() || r.NextDouble() >= ModConfig.Instance.GlobalChance)
+            if (Game1.timeOfDay != 600 || !Game1.player.isMarried() || r.NextDouble() >= _config.GlobalChance)
                 return;
 
             // Get Spouse
@@ -161,14 +162,14 @@ namespace LeFauxMatt.HelpfulSpouses
                 return;
 
             // Get Spouse Chores
-            ModConfig.Instance.Spouses.TryGetValue(spouse.Name, out var spouseConfig);
+            _config.Spouses.TryGetValue(spouse.Name, out var spouseConfig);
             if (spouseConfig == null || !spouseConfig.Any())
                 return;
 
             // Get Spouse Hearts
             Game1.player.friendshipData.TryGetValue(spouse.Name, out var friendship);
             var spouseHearts = friendship.Points / NPC.friendshipPointsPerHeartLevel;
-            if (spouseHearts < ModConfig.Instance.HeartsNeeded && ModConfig.Instance.HeartsNeeded > 0)
+            if (spouseHearts < _config.HeartsNeeded && _config.HeartsNeeded > 0)
                 return;
 
             // Get Chores
@@ -187,51 +188,50 @@ namespace LeFauxMatt.HelpfulSpouses
                 select chore.Value).Shuffle();
 
             // Perform Chores
-            var choresDone = ModConfig.Instance.DailyLimit;
+            var choresDone = _config.DailyLimit;
             foreach (var chore in choreList)
             {
                 // Check Chore
-                if (!CustomChoresApi.CheckChore(chore.ChoreName))
+                if (!_customChoresApi.CheckChore(chore.ChoreName))
                     continue;
                 
                 // Try Chore
-                if (!CustomChoresApi.DoChore(chore.ChoreName))
+                if (!_customChoresApi.DoChore(chore.ChoreName))
                     continue;
 
-                Monitor.Log($"Successfully performed chore {chore.ChoreName}");
+                Monitor.Log($"Successfully performed chore {chore.ChoreName}", LogLevel.Trace);
 
                 // Add Dialogue
-                
-                var tokens = CustomChoresApi.GetChoreTokens(chore.ChoreName);
+                var tokens = _customChoresApi.GetChoreTokens(chore.ChoreName);
                 tokens.Add("Mod", () => "HelpfulSpouses");
                 tokens.Add("Priority", () => "");
 
-                IList<TranslationData> dialogue = null;
+                IEnumerable<TranslationData> dialogue = null;
+                chore.ClearTranslationCache();
 
                 // Get Prioritized Dialogue
                 for (var priority = 1; priority <= 3; ++priority)
                 {
                     // Dialogue by order of priority
-                    var currentPriority = priority;
-                    tokens["Priority"] = () => currentPriority.ToString(CultureInfo.InvariantCulture);
-                    dialogue = (
+                    tokens["Priority"] = priority.ToString;
+                    dialogue =
                         from translation in chore.Translations
                         where translation.Key.Equals("Dialogue", StringComparison.CurrentCultureIgnoreCase)
                               && translation.Filter(tokens)
                               && translation.HasSelector("Priority")
-                        select translation).ToList();
+                        select translation;
                     if (dialogue.Any()) break;
                 }
 
                 // Get Default Dialogue
-                if (dialogue == null || !dialogue.Any())
+                if (!dialogue.Any())
                 {
                     tokens.Remove("Priority");
-                    dialogue = (
+                    dialogue =
                         from translation in chore.Translations
                         where translation.Key.Equals("Dialogue", StringComparison.CurrentCultureIgnoreCase)
                               && translation.Filter(tokens)
-                        select translation).ToList();
+                        select translation;
                 }
 
                 var dialogueText = dialogue.Shuffle().First().Tokens(tokens);
@@ -248,9 +248,9 @@ namespace LeFauxMatt.HelpfulSpouses
             _chores.Clear();
 
             // get chores
-            foreach (var choreKey in CustomChoresApi.GetChores())
+            foreach (var choreKey in _customChoresApi.GetChores())
             {
-                _chores.Add(choreKey, CustomChoresApi.GetChore(choreKey));
+                _chores.Add(choreKey, _customChoresApi.GetChore(choreKey));
             }
 
             return _chores.Any();

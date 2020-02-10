@@ -95,7 +95,7 @@ namespace LeFauxMatt.CustomChores.Framework
 
             // festival
             IDictionary<string, string> festivalDates =
-                CustomChoresMod.Instance.Helper.Content.Load<Dictionary<string, string>>("Day\\Festivals\\FestivalDates",
+                CustomChores.Instance.Helper.Content.Load<Dictionary<string, string>>("Day\\Festivals\\FestivalDates",
                     ContentSource.GameContent);
 
             return festivalDates.TryGetValue($"{Game1.currentSeason}{Game1.dayOfMonth}", out var festivalName) ? festivalName : null;

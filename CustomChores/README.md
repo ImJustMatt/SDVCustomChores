@@ -27,7 +27,7 @@ For each chore, you must specify the name of the chore (ChoreName) and the chanc
 The default chores are as follows:
 
 * `FeedTheAnimals`
-* `LoveThePets`
+* `FeedThePet`
 * `GiveAGift`
 * `PetTheAnimals`
 * `RepairTheFences`

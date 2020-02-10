@@ -12,10 +12,11 @@ namespace LeFauxMatt.CustomChores.Models
         protected internal Translation Translation { get; }
         protected internal IDictionary<string, string> Selectors { get; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         private readonly IList<string> _tokens = new List<string>();
+        private readonly IDictionary<string, string> _tokenCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public TranslationData(Translation translation)
         {
-            Translation = translation ?? throw new ArgumentNullException(nameof(translation));
+            Translation = translation;
 
             var parts = translation.Key.Split('.');
 
@@ -62,7 +63,9 @@ namespace LeFauxMatt.CustomChores.Models
         {
             foreach (var selector in Selectors)
             {
-                var tokenValue = tokens.TryGetValue(selector.Key, out var tokenFn) ? tokenFn.Invoke() : null;
+                if (!_tokenCache.TryGetValue(selector.Key, out var tokenValue))
+                    tokenValue = tokens.TryGetValue(selector.Key, out var tokenFn) ? tokenFn() : null;
+                _tokenCache[selector.Key] = tokenValue;
                 if (tokenValue is null || !selector.Value.Equals(tokenValue, StringComparison.CurrentCultureIgnoreCase))
                     return false;
             }
@@ -75,12 +78,18 @@ namespace LeFauxMatt.CustomChores.Models
             var tokenValues = new Dictionary<string, string>();
             foreach (var tokenKey in _tokens)
             {
-                var tokenValue = tokens.TryGetValue(tokenKey, out var tokenFn) ? tokenFn() : null;
-                if (tokenValue != null)
-                    tokenValues.Add(tokenKey, tokenValue);
+                if (!_tokenCache.TryGetValue(tokenKey, out var tokenValue) || tokenValue is null)
+                    tokenValue = tokens.TryGetValue(tokenKey, out var tokenFn) ? tokenFn() : null;
+                _tokenCache[tokenKey] = tokenValue;
+                tokenValues.Add(tokenKey, tokenValue);
             }
 
             return Translation.Tokens(tokenValues).ToString();
+        }
+
+        public void ClearCache()
+        {
+            _tokenCache.Clear();
         }
     }
 }
