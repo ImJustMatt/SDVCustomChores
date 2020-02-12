@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using LeFauxMatt.CustomChores.Models;
 using StardewValley;
+using StardewValley.Tools;
 
 namespace LeFauxMatt.CustomChores.Framework.Chores
 {
@@ -14,9 +15,9 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         private readonly int _maxGifts;
         private readonly bool _enableUniversal;
         private readonly double _chanceForLove;
-        private readonly IEnumerable<int> _universalLoves;
-        private readonly IEnumerable<int> _universalLikes;
-        private IDictionary<int, string> _items;
+        private readonly List<int> _universalLoves = new List<int>();
+        private readonly List<int> _universalLikes = new List<int>();
+        private Dictionary<int, string> _items = new Dictionary<int, string>();
         private int _giftsGiven;
 
         public GiveAGiftChore(ChoreData choreData) : base(choreData)
@@ -25,7 +26,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             ChoreData.Config.TryGetValue("MaxGifts", out var maxGifts);
             ChoreData.Config.TryGetValue("EnableUniversal", out var enableUniversal);
             ChoreData.Config.TryGetValue("ChanceForLove", out var chanceForLove);
-
+            
             _giftType = giftType is string s && !string.IsNullOrWhiteSpace(s) ? s : "Birthday";
             _maxGifts = maxGifts is int n ? n : 1;
 
@@ -35,22 +36,20 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _enableUniversal = enableUniversal is bool b && b;
             _chanceForLove = chanceForLove is double d ? d : 0.1;
 
-            Game1.NPCGiftTastes.TryGetValue("Universal_Love", out var universalLoves);
-            if (!string.IsNullOrWhiteSpace(universalLoves))
-                _universalLoves =
+            if (Game1.NPCGiftTastes.TryGetValue("Universal_Love", out var universalLoves))
+                _universalLoves.AddRange(
                     from a in universalLoves.Split(' ')
-                    select Convert.ToInt32(a, CultureInfo.InvariantCulture);
+                    select Convert.ToInt32(a, CultureInfo.InvariantCulture));
 
-            Game1.NPCGiftTastes.TryGetValue("Universal_Like", out var universalLikes);
-            if (universalLikes != null)
-                _universalLikes =
+            if (Game1.NPCGiftTastes.TryGetValue("Universal_Like", out var universalLikes))
+                _universalLikes.AddRange(
                     from a in universalLikes.Split(' ')
-                    select Convert.ToInt32(a, CultureInfo.InvariantCulture);
+                    select Convert.ToInt32(a, CultureInfo.InvariantCulture));
         }
 
         public override bool CanDoIt(bool today = true)
         {
-            _items = null;
+            _items.Clear();
             _giftsGiven = _maxGifts > 1 ? Game1.random.Next(1, _maxGifts) : 1;
 
             if (!_giftType.Equals("Birthday", StringComparison.CurrentCultureIgnoreCase))
@@ -127,36 +126,36 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                 }
             }
 
-            var itemCats = itemIds.Where(itemId => itemId < 0);
+            var itemCats = itemIds.Where(itemId => itemId < 0).ToList();
 
             // Get objects by category
-            var objectsFromCats =
+            var objectsFromCats = (
                 from objectInfo in Game1.objectInformation.Select(objectInfo =>
                     new KeyValuePair<int, string[]>(objectInfo.Key, objectInfo.Value.Split('/')[3].Split(' ')))
                 where objectInfo.Value.Length == 2 &&
                       itemCats.Contains(Convert.ToInt32(objectInfo.Value[1], CultureInfo.InvariantCulture))
-                select objectInfo.Key;
+                select objectInfo.Key).ToList();
 
             // Get objects by id
-            var objectsFromIds =
+            var objectsFromIds = (
                 from objectInfo in Game1.objectInformation
                 where itemIds.Contains(objectInfo.Key)
-                select objectInfo.Key;
+                select objectInfo.Key).ToList();
 
             // Get unique objects from both lists
-            var objects =
+            var objects = (
                 from objectInfo in Game1.objectInformation
                 where objectsFromCats.Contains(objectInfo.Key) ||
                       objectsFromIds.Contains(objectInfo.Key)
-                select objectInfo;
+                select objectInfo).ToList();
 
             // Store items to give to player
-            _items = objects.Shuffle().Take(_giftsGiven)
-                .ToDictionary(
-                    item => item.Key,
-                    item => item.Value.Split('/')[0]);
+            foreach (var item in objects.Shuffle().Take(_giftsGiven))
+            {
+                _items.Add(item.Key, item.Value.Split('/')[0]);
+            }
 
-            return true;
+            return _items.Any();
         }
 
         public override IDictionary<string, Func<string>> GetTokens()
@@ -185,7 +184,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             Utility.getTodaysBirthdayNPC(Game1.currentSeason, Game1.dayOfMonth)?.Gender == 1 ? "Female" : "Male";
 
         private string GetGiftsGiven() =>
-            _items.Count.ToString(CultureInfo.InvariantCulture);
+            _items?.Count.ToString(CultureInfo.InvariantCulture);
 
         private string GetWorkNeeded() =>
             _giftsGiven.ToString(CultureInfo.InvariantCulture);

@@ -9,7 +9,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class PetTheAnimalsChore : BaseChore
     {
-        private IList<FarmAnimal> _farmAnimals;
+        private readonly List<FarmAnimal> _farmAnimals = new List<FarmAnimal>();
         private readonly bool _enableBarns;
         private readonly bool _enableCoops;
         private int _animalsPetted;
@@ -26,27 +26,26 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         public override bool CanDoIt(bool today = true)
         {
             _animalsPetted = 0;
+            _farmAnimals.Clear();
 
-            _farmAnimals = (
+            _farmAnimals.AddRange(
                 from farmAnimal in Game1.getFarm().getAllFarmAnimals()
                 where (_enableBarns && farmAnimal.buildingTypeILiveIn.Value.Equals("Barn", StringComparison.CurrentCultureIgnoreCase)) || 
                        (_enableCoops && farmAnimal.buildingTypeILiveIn.Value.Equals("Coop", StringComparison.CurrentCultureIgnoreCase))
-                select farmAnimal).ToList();
+                select farmAnimal);
             
             return _farmAnimals.Any();
         }
 
         public override bool DoIt()
         {
-            foreach (var farmAnimal in _farmAnimals)
+            foreach (var farmAnimal in _farmAnimals.Where(farmAnimal => !farmAnimal.wasPet))
             {
-                if (farmAnimal.wasPet)
-                    continue;
                 farmAnimal.pet(Game1.player);
                 ++_animalsPetted;
             }
 
-            return true;
+            return _animalsPetted > 0;
         }
 
         public override IDictionary<string, Func<string>> GetTokens()
@@ -72,6 +71,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _animalsPetted.ToString(CultureInfo.InvariantCulture);
 
         private string GetWorkNeeded() =>
-            _farmAnimals.Count.ToString(CultureInfo.InvariantCulture);
+            _farmAnimals?.Count.ToString(CultureInfo.InvariantCulture);
     }
 }

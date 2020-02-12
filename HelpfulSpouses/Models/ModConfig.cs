@@ -14,7 +14,7 @@ namespace LeFauxMatt.HelpfulSpouses.Models
         public double GlobalChance { get; set; } = 1;
 
         /// <summary>The spouses that will be able to perform chores.</summary>
-        public IDictionary<string, IDictionary<string, double>> Spouses { get; } = new Dictionary<string, IDictionary<string, double>>();
+        public IDictionary<string, IDictionary<string, double>> Spouses { get; set; } = new Dictionary<string, IDictionary<string, double>>();
 
         public ModConfig()
         {

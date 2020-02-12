@@ -64,7 +64,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                 }
             }
 
-            return true;
+            return _animalsFed > 0;
         }
 
         public override IDictionary<string, Func<string>> GetTokens()

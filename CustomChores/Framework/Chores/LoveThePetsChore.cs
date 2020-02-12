@@ -28,6 +28,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         {
             _petsPetted = 0;
             _pets.Clear();
+
             _pets = Game1.getFarm().characters
                 .OfType<Pet>()
                 .ToList();
@@ -73,7 +74,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         }
 
         private string GetPetCount() =>
-            _pets.Count.ToString(CultureInfo.InvariantCulture);
+            _pets?.Count.ToString(CultureInfo.InvariantCulture);
         private string GetWorkDone() =>
             _petsPetted.ToString(CultureInfo.InvariantCulture);
         private string GetWorkNeeded() =>
