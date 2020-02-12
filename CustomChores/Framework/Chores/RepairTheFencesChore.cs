@@ -10,7 +10,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class RepairTheFencesChore : BaseChore
     {
-        private IList<Fence> _fences;
+        private readonly List<Fence> _fences = new List<Fence>();
         private readonly bool _enableFarm;
         private readonly bool _enableBuildings;
         private readonly bool _enableOutdoors;
@@ -30,6 +30,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         public override bool CanDoIt(bool today = true)
         {
             _fencesRepaired = 0;
+            _fences.Clear();
 
             var locations =
                 from location in Game1.locations
@@ -44,25 +45,22 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
                     where building.indoors.Value != null
                     select building.indoors.Value);
             
-            _fences = locations
+            _fences.AddRange(locations
                 .SelectMany(location => location.objects.Values)
-                .OfType<Fence>()
-                .ToList();
+                .OfType<Fence>());
             
             return _fences.Any();
         }
 
         public override bool DoIt()
         {
-            foreach (var fence in _fences)
+            foreach (var fence in _fences.Where(fence => !(fence.getHealth() >= fence.maxHealth.Value)))
             {
-                if (fence.getHealth() >= fence.maxHealth.Value)
-                    continue;
                 fence.repair();
                 ++_fencesRepaired;
             }
 
-            return true;
+            return _fencesRepaired > 0;
         }
 
         public override IDictionary<string, Func<string>> GetTokens()
@@ -78,6 +76,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _fencesRepaired.ToString(CultureInfo.InvariantCulture);
 
         private string GetWorkNeeded() =>
-            _fences.Count.ToString(CultureInfo.InvariantCulture);
+            _fences?.Count.ToString(CultureInfo.InvariantCulture);
     }
 }

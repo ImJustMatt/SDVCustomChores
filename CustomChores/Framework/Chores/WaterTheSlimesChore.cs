@@ -9,7 +9,7 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
 {
     internal class WaterTheSlimesChore : BaseChore
     {
-        private IList<SlimeHutch> _slimeHutches;
+        private readonly List<SlimeHutch> _slimeHutches = new List<SlimeHutch>();
         private int _slimesWatered;
 
         public WaterTheSlimesChore(ChoreData choreData) : base(choreData) { }
@@ -17,12 +17,13 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
         public override bool CanDoIt(bool today = true)
         {
             _slimesWatered = 0;
+            _slimeHutches.Clear();
 
-            _slimeHutches =  (
+            _slimeHutches.AddRange(
                 from building in Game1.getFarm().buildings
                 where building.daysOfConstructionLeft.Value <= 0
                       && building.indoors.Value is SlimeHutch
-                select building.indoors.Value as SlimeHutch).ToList();
+                select building.indoors.Value as SlimeHutch);
 
             return _slimeHutches.Any();
         }
@@ -57,6 +58,6 @@ namespace LeFauxMatt.CustomChores.Framework.Chores
             _slimesWatered.ToString(CultureInfo.InvariantCulture);
 
         private string GetWorkNeeded() =>
-            _slimeHutches.Sum(slimeHutch => slimeHutch.waterSpots.Count).ToString(CultureInfo.InvariantCulture);
+            _slimeHutches?.Sum(slimeHutch => slimeHutch.waterSpots.Count).ToString(CultureInfo.InvariantCulture);
     }
 }
