@@ -4,6 +4,7 @@
 	"Version": "1.2.0",
 	"Description": "Custom Chore for petting all barn and coops animals.",
 	"UniqueID": "furyx639.PetTheAnimals",
+	"UpdateKeys": [ "Nexus: 5315" ],
 	"ContentPackFor": {
 		"UniqueID":  "furyx639.CustomChores",
 		"MinimumApiVersion":  "1.2.0"

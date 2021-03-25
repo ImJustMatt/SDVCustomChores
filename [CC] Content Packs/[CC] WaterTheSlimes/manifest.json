@@ -1,9 +1,10 @@
-﻿{
+{
 	"Name": "WaterTheSlimes",
 	"Author": "furyx639",
 	"Version": "1.2.0",
 	"Description": "Custom Chore for filling all water troughs in slime hutches.",
 	"UniqueID": "furyx639.WaterTheSlimes",
+	"UpdateKeys": [ "Nexus: 5315" ],
 	"ContentPackFor": {
 		"UniqueID":  "furyx639.CustomChores",
 		"MinimumApiVersion":  "1.2.0"
